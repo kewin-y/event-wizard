@@ -24,6 +24,7 @@
               nodejs
               prettierd
               typescript-language-server
+              tailwindcss-language-server
               ;
           };
 

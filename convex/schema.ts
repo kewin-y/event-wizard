@@ -31,19 +31,28 @@ export default defineSchema({
     }).index("by_event", ["eventId"]),
     questions: defineTable({
         eventId: v.id("events"),
-        name: v.string(),
+        title: v.string(),
+        // NOTE: Since this is a small project, I won't add the abiltiy to answer questions
+        options: v.array(
+            v.object({
+                title: v.string(),
+                order: v.number(),
+            }),
+        ),
         imageStorageId: v.id("_storage"),
     }).index("by_event", ["eventId"]),
     agendaDates: defineTable({
-        // TODO: What is this?
         eventId: v.id("events"),
-    }).index("by_event", ["eventId"]),
-    agendaItems: defineTable({
-        eventId: v.id("events"),
-        title: v.string(),
-        startTime: v.number(),
-        endTime: v.number(),
-    }).index("by_event", ["eventId"]),
+        value: v.number(),
+        items: v.array(
+            v.object({
+                title: v.string(),
+                description: v.optional(v.string()),
+                startTime: v.optional(v.number()),
+                endTime: v.optional(v.number()),
+            }),
+        ),
+    }),
     documentItems: defineTable({
         eventId: v.id("events"),
         parentId: v.optional(v.id("documentItems")), // null = root level, otherwise parent folder

@@ -6,8 +6,72 @@ import { authTables } from "@convex-dev/auth/server";
 // requires indexes defined on `authTables`.
 // The schema provides more precise TypeScript types.
 export default defineSchema({
-  ...authTables,
-  numbers: defineTable({
-    value: v.number(),
-  }),
+    ...authTables,
+    // TODO: Get rid of this numbers table
+    numbers: defineTable({
+        value: v.number(),
+    }),
+    events: defineTable({
+        name: v.string(),
+        slug: v.string(),
+        imageStorageId: v.optional(v.id("_storage")),
+        userId: v.id("users"),
+        featuresEnabled: v.object({
+            attendees: v.boolean(),
+            questions: v.boolean(),
+            agenda: v.boolean(),
+            documents: v.boolean(),
+            zoom: v.boolean(),
+        }),
+    }).index("by_user", ["userId"]),
+    attendees: defineTable({
+        eventId: v.id("events"),
+        name: v.string(),
+        email: v.string(),
+    }).index("by_event", ["eventId"]),
+    questions: defineTable({
+        eventId: v.id("events"),
+        name: v.string(),
+        imageStorageId: v.id("_storage"),
+    }).index("by_event", ["eventId"]),
+    agendaDates: defineTable({
+        // TODO: What is this?
+        eventId: v.id("events"),
+    }).index("by_event", ["eventId"]),
+    agendaItems: defineTable({
+        eventId: v.id("events"),
+        title: v.string(),
+        startTime: v.number(),
+        endTime: v.number(),
+    }).index("by_event", ["eventId"]),
+    documentItems: defineTable({
+        eventId: v.id("events"),
+        parentId: v.optional(v.id("documentItems")), // null = root level, otherwise parent folder
+        type: v.union(
+            v.literal("folder"),
+            v.literal("file"),
+            v.literal("link"),
+        ),
+
+        // Common
+        name: v.string(),
+        createdAt: v.number(),
+        updatedAt: v.number(),
+
+        // Files
+        storageId: v.optional(v.id("_storage")),
+        fileSize: v.optional(v.number()),
+        mimeType: v.optional(v.string()),
+
+        // Links
+        url: v.optional(v.string()),
+    })
+        .index("by_event", ["eventId"])
+        .index("by_parent", ["parentId"])
+        .index("by_event_and_parent", ["eventId", "parentId"]),
+    zoomMeetings: defineTable({
+        eventId: v.id("events"),
+        password: v.optional(v.string()),
+        url: v.string(),
+    }).index("by_event", ["eventId"]),
 });

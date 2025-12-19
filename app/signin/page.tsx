@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/field";
 import {
     Card,
-    CardAction,
     CardContent,
     CardDescription,
     CardFooter,
@@ -169,6 +168,7 @@ export default function SignIn() {
                             onClick={() => {
                                 if (flow === "signIn") {
                                     setFlow("signUp");
+                                    console.log(flow);
                                 } else {
                                     setFlow("signIn");
                                 }

@@ -1,12 +1,14 @@
 "use client";
 
+import { useState } from "react";
+
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 
 import * as z from "zod";
 import { useForm } from "@tanstack/react-form";
 
-import { toast } from "sonner"
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,6 +34,7 @@ const formSchema = z.object({
 });
 
 export default function SignIn() {
+    const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
     const router = useRouter();
     const { signIn } = useAuthActions();
     const form = useForm({
@@ -43,10 +46,10 @@ export default function SignIn() {
             onSubmit: formSchema,
         },
         onSubmit: async ({ value }) => {
-            await signIn("password", { ...value, flow: "signIn" }).catch(
+            await signIn("password", { ...value, flow: flow }).catch(
                 (error) => {
                     toast("Error", {
-                        description: error.message
+                        description: error.message,
                     });
                 },
             );
@@ -58,9 +61,13 @@ export default function SignIn() {
         <div className="flex flex-col h-screen mx-auto justify-center items-center">
             <Card className="w-full max-w-sm">
                 <CardHeader>
-                    <CardTitle>Sign In</CardTitle>
+                    <CardTitle>
+                        {flow === "signIn" ? "Sign In" : "Sign Up"}
+                    </CardTitle>
                     <CardDescription>
-                        Sign in to access your events
+                        {flow === "signIn"
+                            ? "Sign in to access your events"
+                            : "Create your account"}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -80,9 +87,7 @@ export default function SignIn() {
                                         !field.state.meta.isValid;
                                     return (
                                         <Field data-invalid={isInvalid}>
-                                            <FieldDescription>
-                                                Enter your email
-                                            </FieldDescription>
+                                            <FieldLabel>Email</FieldLabel>
                                             <Input
                                                 id="email"
                                                 value={field.state.value}
@@ -116,6 +121,12 @@ export default function SignIn() {
                                             <FieldLabel htmlFor="password">
                                                 Password
                                             </FieldLabel>
+                                            {flow === "signUp" && (
+                                                <FieldDescription>
+                                                    Must be at least 8
+                                                    characters long
+                                                </FieldDescription>
+                                            )}
                                             <Input
                                                 id="password"
                                                 type="password"
@@ -144,17 +155,26 @@ export default function SignIn() {
                 </CardContent>
                 <CardFooter className="flex-col gap-2">
                     <Button className="w-full" form="user-info-form">
-                        Sign In
+                        {flow === "signIn" ? "Sign In" : "Sign Up"}
                     </Button>
                     <div className="flex gap-2 items-center self-start">
                         <CardDescription>
-                            Don't have an account?
+                            {flow === "signIn"
+                                ? "Don't have an account?"
+                                : "Already have an account?"}
                         </CardDescription>
                         <Button
                             variant="link"
                             className="p-0 hover:cursor-pointer"
+                            onClick={() => {
+                                if (flow === "signIn") {
+                                    setFlow("signUp");
+                                } else {
+                                    setFlow("signIn");
+                                }
+                            }}
                         >
-                            Sign Up
+                            {flow === "signIn" ? "Sign Up" : "Sign In"}
                         </Button>
                     </div>
                 </CardFooter>

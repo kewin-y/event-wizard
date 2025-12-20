@@ -14,9 +14,11 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
+import { SetupOpts, Step } from "./types";
+import Setup from "./Setup";
 
 export default function EventCreationDialog() {
-    const [steps, setSteps] = useState([
+    const [steps, setSteps] = useState<Step[]>([
         {
             name: "Setup",
             enabled: true,
@@ -50,6 +52,11 @@ export default function EventCreationDialog() {
     const [currentStep, setCurrentStep] = useState(0);
     const totalSteps = steps.reduce((a, b) => a + (b.enabled ? 1 : 0), 0);
 
+    const [setupOpts, setSetupOpts] = useState<SetupOpts>({
+        name: "",
+        slug: "",
+    });
+
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -61,6 +68,12 @@ export default function EventCreationDialog() {
                 <DialogHeader>
                     <DialogTitle>Create Event</DialogTitle>
                 </DialogHeader>
+                <Setup
+                    steps={steps}
+                    setSteps={setSteps}
+                    setupOpts={setupOpts}
+                    setSetupOpts={setSetupOpts}
+                />
             </DialogContent>
         </Dialog>
     );

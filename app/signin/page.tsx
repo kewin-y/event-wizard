@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/card";
 
 const formSchema = z.object({
-    email: z.email({ message: "Please enter a valid email" }),
+    email: z.email({ error: "Please enter a valid email" }),
     password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
@@ -86,7 +86,9 @@ export default function SignIn() {
                                         !field.state.meta.isValid;
                                     return (
                                         <Field data-invalid={isInvalid}>
-                                            <FieldLabel>Email</FieldLabel>
+                                            <FieldLabel htmlFor="email">
+                                                Email
+                                            </FieldLabel>
                                             <Input
                                                 id="email"
                                                 value={field.state.value}

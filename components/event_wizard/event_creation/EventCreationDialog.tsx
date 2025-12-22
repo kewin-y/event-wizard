@@ -18,39 +18,20 @@ import { SetupOpts, Step } from "./types";
 import Setup from "./Setup";
 
 export default function EventCreationDialog() {
-    const [steps, setSteps] = useState<Step[]>([
-        {
-            name: "Setup",
-            enabled: true,
-        },
-        {
-            name: "Attendees",
-            enabled: false,
-        },
-        {
-            name: "Questions",
-            enabled: false,
-        },
-        {
-            name: "Agenda",
-            enabled: false,
-        },
-        {
-            name: "Documents",
-            enabled: false,
-        },
-        {
-            name: "Zoom",
-            enabled: false,
-        },
-        {
-            name: "Review",
-            enabled: true,
-        },
+    const SETUP_STEP = { name: "Setup", enabled: true } as const;
+    const REVIEW_STEP = { name: "Setup", enabled: true } as const;
+    const [featureSteps, setFeatureSteps] = useState<Step[]>([
+        { name: "Attendees", enabled: false },
+        { name: "Questions", enabled: false },
+        { name: "Agenda", enabled: false },
+        { name: "Documents", enabled: false },
+        { name: "Zoom", enabled: false },
     ]);
 
-    const [currentStep, setCurrentStep] = useState(0);
+    const steps = [SETUP_STEP, ...featureSteps, REVIEW_STEP];
     const totalSteps = steps.reduce((a, b) => a + (b.enabled ? 1 : 0), 0);
+
+    const [currentStep, setCurrentStep] = useState(0);
 
     const [setupOpts, setSetupOpts] = useState<SetupOpts>({
         name: "",
@@ -69,8 +50,8 @@ export default function EventCreationDialog() {
                     <DialogTitle>Create Event</DialogTitle>
                 </DialogHeader>
                 <Setup
-                    steps={steps}
-                    setSteps={setSteps}
+                    featureSteps={featureSteps}
+                    setFeatureSteps={setFeatureSteps}
                     setupOpts={setupOpts}
                     setSetupOpts={setSetupOpts}
                 />

@@ -13,11 +13,31 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { useState } from "react";
-import { SetupOpts, Step } from "./types";
-import Setup from "./Setup";
+import { Dispatch, SetStateAction, useState } from "react";
+import { SetupOpts, Step, EventSchema, EventSchemaValues } from "./types";
+import { useForm, FormApi } from "@tanstack/react-form";
+import * as z from "zod";
+import { useAppForm } from "./form";
+import SetupFields from "./SetupFields";
+
+const defaultEventValues: EventSchemaValues = {
+    setup: {
+        name: "",
+        slug: "",
+        image: null,
+        features: [],
+    },
+};
 
 export default function EventCreationDialog() {
+    const form = useAppForm({
+        defaultValues: defaultEventValues,
+        validators: {
+            onChange: EventSchema,
+        },
+        onSubmit: async ({ value }) => {},
+    });
+
     const SETUP_STEP = { name: "Setup", enabled: true } as const;
     const REVIEW_STEP = { name: "Setup", enabled: true } as const;
     const [featureSteps, setFeatureSteps] = useState<Step[]>([
@@ -33,10 +53,11 @@ export default function EventCreationDialog() {
 
     const [currentStep, setCurrentStep] = useState(0);
 
-    const [setupOpts, setSetupOpts] = useState<SetupOpts>({
-        name: "",
-        slug: "",
-    });
+    const SetupFieldsWrapper = () => (
+        <>
+            <SetupFields form={form} fields={"setup"} />
+        </>
+    );
 
     return (
         <Dialog>
@@ -49,12 +70,17 @@ export default function EventCreationDialog() {
                 <DialogHeader>
                     <DialogTitle>Create Event</DialogTitle>
                 </DialogHeader>
-                <Setup
-                    featureSteps={featureSteps}
-                    setFeatureSteps={setFeatureSteps}
-                    setupOpts={setupOpts}
-                    setSetupOpts={setSetupOpts}
-                />
+                <DialogDescription>
+                    Fill out the following wizard to create your event.
+                </DialogDescription>
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        form.handleSubmit();
+                    }}
+                >
+                    <SetupFieldsWrapper />
+                </form>
             </DialogContent>
         </Dialog>
     );

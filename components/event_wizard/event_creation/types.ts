@@ -12,7 +12,7 @@ export type SetupOpts = {
     imageStorageId?: Id<"_storage">;
 };
 
-const features = ["Attendees", "Questions", "Documents", "Zoom"] as const;
+const features = ["Attendees", "Questions", "Agenda", "Documents", "Zoom"] as const;
 
 export const EventSchema = z.object({
     setup: z.object({

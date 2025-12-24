@@ -22,7 +22,7 @@ const SetupFields = withFieldGroup({
     defaultValues: {},
     render: function Render({ group }) {
         return (
-            <FieldGroup>
+            <>
                 <group.AppField
                     name="name"
                     children={(field) => (
@@ -51,7 +51,7 @@ const SetupFields = withFieldGroup({
                         />
                     )}
                 />
-            </FieldGroup>
+            </>
         );
     },
 });

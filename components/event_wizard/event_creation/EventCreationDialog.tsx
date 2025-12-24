@@ -99,55 +99,14 @@ export default function EventCreationDialog() {
             <form.AppField
               name="setup.features"
               mode="array"
-              children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field>
-                    <FieldSet>
-                      <FieldLegend variant="label">Features</FieldLegend>
-                      <FieldDescription>
-                        Select features to enable for your event
-                      </FieldDescription>
-                      <FieldGroup data-slot="checkbox-group">
-                        {featureSteps.map((feature) => (
-                          <Field key={feature.name} orientation="horizontal">
-                            <Checkbox
-                              id={`features-${feature.name}`}
-                              aria-invalid={isInvalid}
-                              checked={field.state.value.includes(feature.name)}
-                              name={feature.name}
-                              onCheckedChange={(checked) => {
-                                toggleFeatureByName(feature.name);
-
-                                if (checked) {
-                                  field.pushValue(feature.name);
-                                } else {
-                                  const index = field.state.value.indexOf(
-                                    feature.name,
-                                  );
-                                  if (index > -1) {
-                                    field.removeValue(index);
-                                  }
-                                }
-                              }}
-                            />
-                            <FieldLabel
-                              htmlFor={`features-${feature.name}`}
-                              className="font-normal"
-                            >
-                              {feature.name}
-                            </FieldLabel>
-                          </Field>
-                        ))}
-                      </FieldGroup>
-                    </FieldSet>
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
+              children={(field) => (
+                <field.CheckboxArrayField
+                  label="poop"
+                  description="Select features to enable for your event"
+                  arr={featureSteps.map((feature) => feature.name)}
+                  onCheckedChange={toggleFeatureByName}
+                />
+              )}
             />
           </FieldGroup>
         </form>

@@ -2,7 +2,7 @@
 
 import {
   Dialog,
-  DialogClose,
+  // DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -13,20 +13,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { Dispatch, SetStateAction, useState } from "react";
-import { SetupOpts, Step, EventSchema, EventSchemaValues } from "./types";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from "react";
+import { Step, EventSchema, EventSchemaValues } from "./types";
 import { useAppForm } from "./form";
 import SetupFields from "./SetupFields";
-import {
-  Field,
-  FieldLabel,
-  FieldSet,
-  FieldLegend,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-} from "@/components/ui/field";
+import { AnyFormApi, useStore, ValidationCause } from "@tanstack/react-form";
 
 const defaultEventValues: EventSchemaValues = {
   setup: {
@@ -36,6 +27,28 @@ const defaultEventValues: EventSchemaValues = {
     features: [],
   },
 };
+
+function useIsGroupValid(form: AnyFormApi, group: string) {
+  return useStore(form.store, (state) => {
+    return Object.entries(state.fieldMeta).every(
+      ([name, meta]) =>
+        !name.startsWith(`${group}.`) ||
+        (meta?.errors.length === 0 && !meta?.isValidating),
+    );
+  });
+}
+
+async function validateGroup(
+  form: AnyFormApi,
+  group: string,
+  cause: ValidationCause,
+) {
+  await Promise.all(
+    Object.keys(form.state.fieldMeta)
+      .filter((name) => name.startsWith(`${group}.`))
+      .map((name) => form.validateField(name, cause)),
+  );
+}
 
 export default function EventCreationDialog() {
   const form = useAppForm({
@@ -47,7 +60,7 @@ export default function EventCreationDialog() {
   });
 
   const SETUP_STEP = { name: "Setup", enabled: true } as const;
-  const REVIEW_STEP = { name: "Setup", enabled: true } as const;
+  const REVIEW_STEP = { name: "Review", enabled: true } as const;
 
   const [featureSteps, setFeatureSteps] = useState<Step[]>([
     { name: "Attendees", enabled: false },
@@ -58,12 +71,13 @@ export default function EventCreationDialog() {
   ]);
 
   const steps = [SETUP_STEP, ...featureSteps, REVIEW_STEP];
+  const enabledSteps = steps.filter((step) => step.enabled);
 
-  // Sum up the number of enabled steps
-  const totalSteps = steps.reduce((a, b) => a + (b.enabled ? 1 : 0), 0);
+  // Index of the current step according to `enabledSteps`
+  const [currentStep, setCurrentStep] = useState(0);
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const currentGroup = enabledSteps[currentStep].name.toLowerCase();
+  const isCurrentGroupValid = useIsGroupValid(form, currentGroup);
 
   const toggleFeatureByName = (name: string) => {
     setFeatureSteps((prev) =>
@@ -94,35 +108,35 @@ export default function EventCreationDialog() {
             form.handleSubmit();
           }}
         >
-          <FieldGroup>
-            <SetupFields form={form} fields={"setup"} />
-            <form.AppField
-              name="setup.features"
-              mode="array"
-              children={(field) => (
-                <field.CheckboxArrayField
-                  label="poop"
-                  description="Select features to enable for your event"
-                  arr={featureSteps.map((feature) => feature.name)}
-                  onCheckedChange={toggleFeatureByName}
-                />
-              )}
-            />
-          </FieldGroup>
+          <SetupFields
+            form={form}
+            fields={"setup"}
+            toggleFeatureByName={toggleFeatureByName}
+            featureSteps={featureSteps}
+          />
         </form>
         <div className="border-b" />
         <DialogFooter>
           <div className="flex flex-col gap-4 w-full">
             <div className="flex justify-between text-muted-foreground text-sm">
               <span>
-                Step {currentStep} out of {totalSteps}
+                Step {currentStep + 1} out of {enabledSteps.length}
               </span>
-              <span>{steps[currentStepIndex].name}</span>
+              <span>{enabledSteps[currentStep].name}</span>
             </div>
-            <Progress value={(currentStep / totalSteps) * 100} />
+            <Progress value={((currentStep + 1) / enabledSteps.length) * 100} />
             <div className="flex justify-between">
-              <Button variant="outline">Previous</Button>
-              <Button>Next</Button>
+              <Button variant="outline" disabled={currentStep === 1}>
+                Previous
+              </Button>
+              <Button
+                disabled={!isCurrentGroupValid}
+                onClick={async () => {
+                  await validateGroup(form, currentGroup, "submit");
+                }}
+              >
+                Next
+              </Button>
             </div>
           </div>
         </DialogFooter>

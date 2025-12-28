@@ -15,17 +15,18 @@ import { Plus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
 import { Step, EventSchema, EventSchemaValues } from "./types";
-import { useAppForm } from "./form";
+import { useAppForm } from "./form/AppForm";
 import SetupFields from "./SetupFields";
 import { AnyFormApi, useStore, ValidationCause } from "@tanstack/react-form";
 
 const defaultEventValues: EventSchemaValues = {
   setup: {
-    name: "",
-    slug: "",
+    name: "Dinner",
+    slug: "dinner",
     image: null,
     features: [],
   },
+  attendees: [],
 };
 
 function useIsGroupValid(form: AnyFormApi, group: string) {
@@ -74,9 +75,11 @@ export default function EventCreationDialog() {
   const enabledSteps = steps.filter((step) => step.enabled);
 
   // Index of the current step according to `enabledSteps`
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStepIndex, setCurrentStep] = useState(0);
+  const currentStep = enabledSteps[currentStepIndex].name;
 
-  const currentGroup = enabledSteps[currentStep].name.toLowerCase();
+  // Used to access the field group
+  const currentGroup = currentStep.toLowerCase();
   const isCurrentGroupValid = useIsGroupValid(form, currentGroup);
 
   const toggleFeatureByName = (name: string) => {
@@ -97,42 +100,73 @@ export default function EventCreationDialog() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create Event</DialogTitle>
+          <DialogDescription>
+            Fill out the following wizard to create your event.
+          </DialogDescription>
         </DialogHeader>
-        <DialogDescription>
-          Fill out the following wizard to create your event.
-        </DialogDescription>
-        <div className="border-b" />
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            form.handleSubmit();
-          }}
-        >
-          <SetupFields
-            form={form}
-            fields={"setup"}
-            toggleFeatureByName={toggleFeatureByName}
-            featureSteps={featureSteps}
-          />
-        </form>
-        <div className="border-b" />
+        <div className="px-6 py-4 border-b border-t">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
+          >
+            {(() => {
+              switch (currentStep) {
+                case "Setup":
+                  return (
+                    <SetupFields
+                      form={form}
+                      fields={"setup"}
+                      toggleFeatureByName={toggleFeatureByName}
+                      featureSteps={featureSteps}
+                    />
+                  );
+                case "Attendees":
+                  return <></>;
+                default:
+                  return null;
+              }
+            })()}
+          </form>
+        </div>
         <DialogFooter>
           <div className="flex flex-col gap-4 w-full">
             <div className="flex justify-between text-muted-foreground text-sm">
               <span>
-                Step {currentStep + 1} out of {enabledSteps.length}
+                Step {currentStepIndex + 1} out of {enabledSteps.length}
               </span>
-              <span>{enabledSteps[currentStep].name}</span>
+              <span>{enabledSteps[currentStepIndex].name}</span>
             </div>
-            <Progress value={((currentStep + 1) / enabledSteps.length) * 100} />
+            <Progress
+              value={((currentStepIndex + 1) / enabledSteps.length) * 100}
+            />
             <div className="flex justify-between">
-              <Button variant="outline" disabled={currentStep === 1}>
+              <Button
+                variant="outline"
+                disabled={currentStepIndex === 0}
+                onClick={() => {
+                  if (currentStepIndex !== 0) {
+                    setCurrentStep((prev) => prev - 1);
+                  }
+                }}
+              >
                 Previous
               </Button>
               <Button
-                disabled={!isCurrentGroupValid}
+                disabled={
+                  !isCurrentGroupValid ||
+                  currentStepIndex === enabledSteps.length - 1
+                }
                 onClick={async () => {
                   await validateGroup(form, currentGroup, "submit");
+
+                  if (
+                    isCurrentGroupValid &&
+                    currentStepIndex <= enabledSteps.length - 1
+                  ) {
+                    setCurrentStep((prev) => prev + 1);
+                  }
                 }}
               >
                 Next

@@ -1,13 +1,11 @@
-import { withFieldGroup } from "./form";
+import { withFieldGroup } from "./form/AppForm";
 import { Step } from "./types";
 import { FieldGroup } from "@/components/ui/field";
-
-type Callback = (arg0: string) => void;
 
 const SetupFields = withFieldGroup({
   defaultValues: {},
   props: {
-    toggleFeatureByName: (() => {}) as Callback,
+    toggleFeatureByName: (() => {}) as (arg0: string) => void,
     featureSteps: [] as Step[],
   },
   render: function Render({ group, toggleFeatureByName, featureSteps }) {

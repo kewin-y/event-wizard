@@ -1,7 +1,16 @@
 import * as z from "zod";
 
+export type StepName =
+  | "Setup"
+  | "Attendees"
+  | "Questions"
+  | "Agenda"
+  | "Documents"
+  | "Zoom"
+  | "Review";
+
 export type Step = {
-  name: string;
+  name: StepName;
   enabled: boolean;
 };
 
@@ -21,11 +30,11 @@ export const EventSchema = z.object({
       .max(48, "Event name must be no more than 48 characters"),
     slug: z
       .string()
-      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Enter a valid URL slug"),
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Enter a valid URL slug."),
     image: z
       .instanceof(File)
       .refine((file) => file.size <= 5 * 1024 * 1024, {
-        message: "File size must be less than 5MB",
+        message: "File size must be less than 5MB.",
       })
       .refine(
         (file) =>
@@ -33,7 +42,7 @@ export const EventSchema = z.object({
             file.type,
           ),
         {
-          message: "File must be a JPEG, PNG, or WebP image",
+          message: "File must be a JPEG, PNG, or WebP image.",
         },
       )
       .nullish(),
@@ -47,6 +56,14 @@ export const EventSchema = z.object({
         },
       ),
   }),
+  attendees: z
+    .array(
+      z.object({
+        name: z.string(),
+        email: z.email({ error: "Enter a valid email address." }),
+      }),
+    )
+    .min(1, "Add at least one attendee"),
 });
 
 export type EventSchemaValues = z.infer<typeof EventSchema>;

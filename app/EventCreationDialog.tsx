@@ -14,52 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
-import { Step, EventSchema, EventSchemaValues } from "./types";
-import { useAppForm } from "./form/AppForm";
-import SetupFields from "./SetupFields";
-import { AnyFormApi, useStore, ValidationCause } from "@tanstack/react-form";
-
-const defaultEventValues: EventSchemaValues = {
-  setup: {
-    name: "Dinner",
-    slug: "dinner",
-    image: null,
-    features: [],
-  },
-  attendees: [],
-};
-
-function useIsGroupValid(form: AnyFormApi, group: string) {
-  return useStore(form.store, (state) => {
-    return Object.entries(state.fieldMeta).every(
-      ([name, meta]) =>
-        !name.startsWith(`${group}.`) ||
-        (meta?.errors.length === 0 && !meta?.isValidating),
-    );
-  });
-}
-
-async function validateGroup(
-  form: AnyFormApi,
-  group: string,
-  cause: ValidationCause,
-) {
-  await Promise.all(
-    Object.keys(form.state.fieldMeta)
-      .filter((name) => name.startsWith(`${group}.`))
-      .map((name) => form.validateField(name, cause)),
-  );
-}
+import { Step } from "./types";
 
 export default function EventCreationDialog() {
-  const form = useAppForm({
-    defaultValues: defaultEventValues,
-    validators: {
-      onChange: EventSchema,
-    },
-    onSubmit: async ({ value }) => {},
-  });
-
   const SETUP_STEP = { name: "Setup", enabled: true } as const;
   const REVIEW_STEP = { name: "Review", enabled: true } as const;
 
@@ -77,10 +34,6 @@ export default function EventCreationDialog() {
   // Index of the current step according to `enabledSteps`
   const [currentStepIndex, setCurrentStep] = useState(0);
   const currentStep = enabledSteps[currentStepIndex].name;
-
-  // Used to access the field group
-  const currentGroup = currentStep.toLowerCase();
-  const isCurrentGroupValid = useIsGroupValid(form, currentGroup);
 
   const toggleFeatureByName = (name: string) => {
     setFeatureSteps((prev) =>
@@ -108,27 +61,8 @@ export default function EventCreationDialog() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              form.handleSubmit();
             }}
-          >
-            {(() => {
-              switch (currentStep) {
-                case "Setup":
-                  return (
-                    <SetupFields
-                      form={form}
-                      fields={"setup"}
-                      toggleFeatureByName={toggleFeatureByName}
-                      featureSteps={featureSteps}
-                    />
-                  );
-                case "Attendees":
-                  return <></>;
-                default:
-                  return null;
-              }
-            })()}
-          </form>
+          ></form>
         </div>
         <DialogFooter>
           <div className="flex flex-col gap-4 w-full">
@@ -153,24 +87,7 @@ export default function EventCreationDialog() {
               >
                 Previous
               </Button>
-              <Button
-                disabled={
-                  !isCurrentGroupValid ||
-                  currentStepIndex === enabledSteps.length - 1
-                }
-                onClick={async () => {
-                  await validateGroup(form, currentGroup, "submit");
-
-                  if (
-                    isCurrentGroupValid &&
-                    currentStepIndex <= enabledSteps.length - 1
-                  ) {
-                    setCurrentStep((prev) => prev + 1);
-                  }
-                }}
-              >
-                Next
-              </Button>
+              <Button>Next</Button>
             </div>
           </div>
         </DialogFooter>

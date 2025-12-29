@@ -1,4 +1,5 @@
-import { GenericFieldProps, useFieldContext } from "./AppForm";
+import { useFieldContext } from "@/hooks/formContext";
+import { GenericFieldProps } from "@/hooks/form";
 
 import { useStore } from "@tanstack/react-form";
 import { Checkbox } from "@/components/ui/checkbox";

@@ -46,4 +46,14 @@ export const SetupSchema = z.object({
     ),
 });
 
+export const AttendeesSchema = z.object({
+  arr: z.array(
+    z.object({
+      name: z.string().min(1, "Attendee name must be nonempty."),
+      email: z.email({ error: "Enter a valid email address." }),
+    }),
+  ),
+});
+
 export type SetupValues = z.infer<typeof SetupSchema>;
+export type AttendeesValues = z.infer<typeof AttendeesSchema>;

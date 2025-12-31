@@ -1,5 +1,10 @@
 import { createContext, useContext, useState } from "react";
-import { Feature, FeatureName, SetupValues } from "@/types/event-wizard-common";
+import {
+  AttendeesValues,
+  Feature,
+  FeatureName,
+  SetupValues,
+} from "@/types/event-wizard-common";
 
 const defaultSetupValues: SetupValues = {
   name: "",
@@ -8,8 +13,13 @@ const defaultSetupValues: SetupValues = {
   features: [],
 };
 
+export const defaultAttendeesValues: AttendeesValues = {
+  arr: [{ name: "", email: "" }],
+};
+
 type WizardData = {
   setup: SetupValues;
+  attendees: AttendeesValues;
 };
 
 const FORM_IDS = {
@@ -29,7 +39,7 @@ type WizardContextValue = {
       | { readonly name: "Setup"; readonly enabled: true }
       | { readonly name: "Review"; readonly enabled: true };
     idx: number;
-    form: string;
+    formId: string;
   };
 
   totalSteps: number;
@@ -39,6 +49,7 @@ type WizardContextValue = {
 
   data: WizardData;
   setSetupValues: (v: SetupValues) => void;
+  setAttendeesValues: (v: AttendeesValues) => void;
 };
 
 const WizardContext = createContext<WizardContextValue | null>(null);
@@ -49,6 +60,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 
   const [data, setData] = useState<WizardData>({
     setup: defaultSetupValues,
+    attendees: defaultAttendeesValues,
   });
 
   const [features, setFeatures] = useState<Feature[]>([
@@ -69,7 +81,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     step: {
       data: currentStep,
       idx: stepIdx,
-      form: FORM_IDS[currentStep.name],
+      formId: FORM_IDS[currentStep.name],
     },
     toggleFeature(name: FeatureName) {
       setFeatures((current) =>
@@ -91,6 +103,9 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     data: data,
     setSetupValues(v: SetupValues) {
       setData((current) => ({ ...current, setup: v }));
+    },
+    setAttendeesValues(v: AttendeesValues) {
+      setData((current) => ({ ...current, attendees: v }));
     },
     totalSteps: enabledSteps.length,
   };

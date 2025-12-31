@@ -83,51 +83,49 @@ export const myAction = action({
 
 ```tsx
 const formSchema = z.object({
-    name: z
-        .string()
-        .min(3, "Event name must be at least 3 characters")
-        .max(48, "Event name must be no more than 48 characters"),
-    slug: z
-        .string()
-        .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Enter a valid URL slug"),
-    image: z
-        .instanceof(File)
-        .refine((file) => file.size <= 5 * 1024 * 1024, {
-            message: "File size must be less than 5MB",
-        })
-        .refine(
-            (file) =>
-                ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(
-                    file.type,
-                ),
-            {
-                message: "File must be a JPEG, PNG, or WebP image",
-            },
-        )
-        .nullish(),
-    features: z
-        .array(z.string())
-        .refine(
-            (value) =>
-                value.every((feature) => features.some((f) => f === feature)),
-            {
-                message: "Invalid feature selected.",
-            },
+  name: z
+    .string()
+    .min(3, "Event name must be at least 3 characters")
+    .max(48, "Event name must be no more than 48 characters"),
+  slug: z
+    .string()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Enter a valid URL slug"),
+  image: z
+    .instanceof(File)
+    .refine((file) => file.size <= 5 * 1024 * 1024, {
+      message: "File size must be less than 5MB",
+    })
+    .refine(
+      (file) =>
+        ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(
+          file.type,
         ),
+      {
+        message: "File must be a JPEG, PNG, or WebP image",
+      },
+    )
+    .nullish(),
+  features: z
+    .array(z.string())
+    .refine(
+      (value) => value.every((feature) => features.some((f) => f === feature)),
+      {
+        message: "Invalid feature selected.",
+      },
+    ),
 });
 ```
 
-
 ```tsx
-"use client"
+"use client";
 
-import * as React from "react"
-import { useForm } from "@tanstack/react-form"
-import { XIcon } from "lucide-react"
-import { toast } from "sonner"
-import { z } from "zod"
+import * as React from "react";
+import { useForm } from "@tanstack/react-form";
+import { XIcon } from "lucide-react";
+import { toast } from "sonner";
+import { z } from "zod";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -135,7 +133,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Field,
   FieldContent,
@@ -144,24 +142,24 @@ import {
   FieldGroup,
   FieldLegend,
   FieldSet,
-} from "@/components/ui/field"
+} from "@/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "@/components/ui/input-group"
+} from "@/components/ui/input-group";
 
 const formSchema = z.object({
   emails: z
     .array(
       z.object({
         address: z.string().email("Enter a valid email address."),
-      })
+      }),
     )
     .min(1, "Add at least one email address.")
     .max(5, "You can add up to 5 email addresses."),
-})
+});
 
 export function FormTanstackArray() {
   const form = useForm({
@@ -185,9 +183,9 @@ export function FormTanstackArray() {
         style: {
           "--border-radius": "calc(var(--radius)  + 4px)",
         } as React.CSSProperties,
-      })
+      });
     },
-  })
+  });
 
   return (
     <Card className="w-full sm:max-w-md">
@@ -199,14 +197,14 @@ export function FormTanstackArray() {
         <form
           id="form-tanstack-array"
           onSubmit={(e) => {
-            e.preventDefault()
-            form.handleSubmit()
+            e.preventDefault();
+            form.handleSubmit();
           }}
         >
           <form.Field name="emails" mode="array">
             {(field) => {
               const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid
+                field.state.meta.isTouched && !field.state.meta.isValid;
               return (
                 <FieldSet className="gap-4">
                   <FieldLegend variant="label">Email Addresses</FieldLegend>
@@ -221,7 +219,7 @@ export function FormTanstackArray() {
                         children={(subField) => {
                           const isSubFieldInvalid =
                             subField.state.meta.isTouched &&
-                            !subField.state.meta.isValid
+                            !subField.state.meta.isValid;
                           return (
                             <Field
                               orientation="horizontal"
@@ -263,7 +261,7 @@ export function FormTanstackArray() {
                                 )}
                               </FieldContent>
                             </Field>
-                          )
+                          );
                         }}
                       />
                     ))}
@@ -279,7 +277,7 @@ export function FormTanstackArray() {
                   </FieldGroup>
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </FieldSet>
-              )
+              );
             }}
           </form.Field>
         </form>
@@ -295,49 +293,6 @@ export function FormTanstackArray() {
         </Field>
       </CardFooter>
     </Card>
-  )
-}
-```
-
-```tsx
-
-import {
-  Dialog,
-  // DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { useWizard } from "./wizard-context";
-
-export default function WizardProgress() {
-  const { step, totalSteps, prev } = useWizard();
-  return (
-    <DialogFooter>
-      <div className="flex flex-col gap-4 w-full">
-        <div className="flex justify-between text-muted-foreground text-sm">
-          <span>
-            Step {step.idx + 1} out of {totalSteps}
-          </span>
-          <span>{step.data.name}</span>
-        </div>
-        <Progress value={((step.idx + 1) / totalSteps) * 100} />
-        <div className="flex justify-between">
-          <Button variant="outline" disabled={step.idx <= 0} onClick={prev}>
-            Previous
-          </Button>
-          <Button type="submit" form={step.form}>
-            Next
-          </Button>
-        </div>
-      </div>
-    </DialogFooter>
   );
 }
 ```

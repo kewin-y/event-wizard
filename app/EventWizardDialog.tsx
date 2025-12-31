@@ -17,6 +17,7 @@ import { useState } from "react";
 import { useWizard, WizardProvider } from "@/components/wizard-context";
 import SetupForm from "./SetupForm";
 import WizardProgress from "@/components/WizardProgress";
+import AttendeesForm from "./AttendeesForm";
 
 function EventWizardDialogInner() {
   const { step } = useWizard();
@@ -35,14 +36,16 @@ function EventWizardDialogInner() {
             Fill out the following wizard to create your event.
           </DialogDescription>
         </DialogHeader>
-          {(() => {
-            switch (step.data.name) {
-              case "Setup":
-                return <SetupForm />;
-              default:
-                return null;
-            }
-          })()}
+        {(() => {
+          switch (step.data.name) {
+            case "Setup":
+              return <SetupForm />;
+            case "Attendees":
+              return <AttendeesForm />;
+            default:
+              return null;
+          }
+        })()}
       </DialogContent>
     </Dialog>
   );

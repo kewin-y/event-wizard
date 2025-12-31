@@ -34,7 +34,7 @@ export default function WizardProgress({
           >
             Previous
           </Button>
-          <Button type="submit" form={step.form}>
+          <Button type="submit" form={step.formId}>
             Next
           </Button>
         </div>

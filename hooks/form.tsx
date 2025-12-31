@@ -1,8 +1,9 @@
 import { fieldContext, formContext } from "./formContext";
 import { createFormHook } from "@tanstack/react-form";
-import { TextField } from "@/components/form/TextField";
-import { FileUploadField } from "@/components/form/FileUploadField";
-import { CheckboxArrayField } from "@/components/form/CheckBoxArrayField";
+
+import TextField from "@/components/form/TextField";
+import FileUploadField from "@/components/form/FileUploadField";
+import CheckboxArrayField from "@/components/form/CheckBoxArrayField";
 
 export type GenericFieldProps = {
   label: string;

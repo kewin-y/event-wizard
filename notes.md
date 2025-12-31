@@ -298,3 +298,46 @@ export function FormTanstackArray() {
   )
 }
 ```
+
+```tsx
+
+import {
+  Dialog,
+  // DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { useWizard } from "./wizard-context";
+
+export default function WizardProgress() {
+  const { step, totalSteps, prev } = useWizard();
+  return (
+    <DialogFooter>
+      <div className="flex flex-col gap-4 w-full">
+        <div className="flex justify-between text-muted-foreground text-sm">
+          <span>
+            Step {step.idx + 1} out of {totalSteps}
+          </span>
+          <span>{step.data.name}</span>
+        </div>
+        <Progress value={((step.idx + 1) / totalSteps) * 100} />
+        <div className="flex justify-between">
+          <Button variant="outline" disabled={step.idx <= 0} onClick={prev}>
+            Previous
+          </Button>
+          <Button type="submit" form={step.form}>
+            Next
+          </Button>
+        </div>
+      </div>
+    </DialogFooter>
+  );
+}
+```

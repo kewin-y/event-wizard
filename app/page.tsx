@@ -1,5 +1,6 @@
+import { WizardProvider } from "@/components/wizard-context";
 import EventGrid from "./EventGrid";
-import EventCreationDialog from "./EventCreationDialog";
+import EventWizardDialog from "./EventWizardDialog";
 import SignOutButton from "@/components/SignOutButton";
 
 export default function Home() {
@@ -14,7 +15,7 @@ export default function Home() {
       </header>
       <main className="p-12 flex flex-col gap-12">
         <EventGrid />
-        <EventCreationDialog />
+        <EventWizardDialog />
       </main>
     </>
   );

@@ -1,3 +1,4 @@
+// NOTE: Probably won't need this component anymore
 import { useFieldContext } from "@/hooks/formContext";
 import { GenericFieldProps } from "@/hooks/form";
 
@@ -13,15 +14,12 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 
-export function CheckboxArrayField({
+export default function CheckboxArrayField({
   label,
   description,
   arr,
-  onCheckedChange = () => {},
 }: GenericFieldProps & {
   arr: string[];
-  /* Executes for each element in the array */
-  onCheckedChange?: (arg0: string) => void;
 }) {
   const field = useFieldContext<string[]>();
 
@@ -48,8 +46,6 @@ export function CheckboxArrayField({
                 checked={field.state.value.includes(name)}
                 name={name}
                 onCheckedChange={(checked) => {
-                  onCheckedChange(name);
-
                   if (checked) {
                     field.pushValue(name);
                   } else {

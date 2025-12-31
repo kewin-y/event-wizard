@@ -8,7 +8,7 @@ export const getEvents = query({
     const userId = await getAuthUserId(ctx);
 
     if (!userId) {
-      throw "Not authenticated.";
+      throw new Error("Not authenticated.");
     }
 
     const events = await ctx.db.query("events").withIndex("by_user").collect();

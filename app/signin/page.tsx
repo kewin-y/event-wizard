@@ -141,12 +141,8 @@ export default function SignIn() {
               variant="link"
               className="p-0 hover:cursor-pointer"
               onClick={() => {
-                if (flow === "signIn") {
-                  setFlow("signUp");
-                  console.log(flow);
-                } else {
-                  setFlow("signIn");
-                }
+                if (flow === "signIn") setFlow("signUp");
+                else setFlow("signIn");
               }}
             >
               {flow === "signIn" ? "Sign Up" : "Sign In"}

@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/field";
 import { useRef } from "react";
 
-export function FileUploadField({
+// TODO: Change this to a dropzone instead of relying on default input behaviour
+export default function FileUploadField({
   label,
   description,
   accept,

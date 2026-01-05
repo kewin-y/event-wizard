@@ -15,26 +15,28 @@ export type Feature = {
   enabled: boolean;
 };
 
+const zodImage = z
+  .instanceof(File)
+  .refine((file) => file.size <= 5 * 1024 * 1024, {
+    message: "File size must be less than 5MB.",
+  })
+  .refine(
+    (file) =>
+      ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(
+        file.type,
+      ),
+    {
+      message: "File must be a JPEG, PNG, or WebP image.",
+    },
+  )
+  .nullish();
+
 export const SetupSchema = z.object({
   name: z.string().min(1, "Event name must be nonempty."),
   slug: z
     .string()
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Enter a valid URL slug."),
-  image: z
-    .instanceof(File)
-    .refine((file) => file.size <= 5 * 1024 * 1024, {
-      message: "File size must be less than 5MB.",
-    })
-    .refine(
-      (file) =>
-        ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(
-          file.type,
-        ),
-      {
-        message: "File must be a JPEG, PNG, or WebP image.",
-      },
-    )
-    .nullish(),
+  image: zodImage,
   features: z
     .array(z.string())
     .refine(
@@ -47,7 +49,7 @@ export const SetupSchema = z.object({
 });
 
 export const AttendeesSchema = z.object({
-  arr: z.array(
+  attendees: z.array(
     z.object({
       name: z.string().min(1, "Attendee name must be nonempty."),
       email: z.email({ error: "Enter a valid email address." }),
@@ -55,5 +57,23 @@ export const AttendeesSchema = z.object({
   ),
 });
 
+export const QuestionsSchema = z.object({
+  questions: z.array(
+    z.object({
+      name: z.string().min(1, "Question name must be nonempty."),
+      image: zodImage,
+      options: z
+        .array(
+          z.object({
+            name: z.string().min(1, "Option name must be nonempty."),
+            image: zodImage,
+          }),
+        )
+        .min(2, "Question must have at least two options."),
+    }),
+  ),
+});
+
 export type SetupValues = z.infer<typeof SetupSchema>;
 export type AttendeesValues = z.infer<typeof AttendeesSchema>;
+export type QuestionsValues = z.infer<typeof QuestionsSchema>;

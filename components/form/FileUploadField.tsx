@@ -11,12 +11,18 @@ import {
 } from "@/components/ui/field";
 import { useRef } from "react";
 
+type FileUploadFieldProps = {
+  label?: string | undefined;
+  description?: string | undefined;
+  accept: string;
+};
+
 // TODO: Change this to a dropzone instead of relying on default input behaviour
 export default function FileUploadField({
   label,
   description,
   accept,
-}: GenericFieldProps & { accept: string }) {
+}: FileUploadFieldProps) {
   const field = useFieldContext<File | null | undefined>();
 
   const errors = useStore(field.store, (state) => state.meta.errors);
@@ -29,9 +35,8 @@ export default function FileUploadField({
 
   return (
     <Field>
-      <FieldLabel htmlFor={`field-${label}`}>{label}</FieldLabel>
-      <FieldDescription>{description}</FieldDescription>
-
+      {label && <FieldLabel htmlFor={`field-${label}`}>{label}</FieldLabel>}
+      {description && <FieldDescription>{description}</FieldDescription>}
       <div className="flex gap-2">
         <Input
           ref={fileInputRef}

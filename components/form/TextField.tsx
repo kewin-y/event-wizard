@@ -40,7 +40,7 @@ export default function TextField({
         aria-invalid={isInvalid}
         placeholder={placeholder ? placeholder : ""}
       />
-      <FieldError errors={errors} className="min-h-4" />
+      {isInvalid && <FieldError errors={errors} className="min-h-4" />}
     </Field>
   );
 }

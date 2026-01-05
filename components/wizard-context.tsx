@@ -3,6 +3,7 @@ import {
   AttendeesValues,
   Feature,
   FeatureName,
+  QuestionsValues,
   SetupValues,
 } from "@/types/event-wizard-common";
 
@@ -13,13 +14,27 @@ const defaultSetupValues: SetupValues = {
   features: [],
 };
 
-export const defaultAttendeesValues: AttendeesValues = {
-  arr: [{ name: "", email: "" }],
+const defaultAttendeesValues: AttendeesValues = {
+  attendees: [{ name: "", email: "" }],
+};
+
+const defaultQuestionsValues: QuestionsValues = {
+  questions: [
+    {
+      name: "",
+      image: null,
+      options: [
+        { name: "Yes", image: null },
+        { name: "No", image: null },
+      ],
+    },
+  ],
 };
 
 type WizardData = {
   setup: SetupValues;
   attendees: AttendeesValues;
+  questions: QuestionsValues;
 };
 
 const FORM_IDS = {
@@ -50,6 +65,7 @@ type WizardContextValue = {
   data: WizardData;
   setSetupValues: (v: SetupValues) => void;
   setAttendeesValues: (v: AttendeesValues) => void;
+  setQuestionsValues: (v: QuestionsValues) => void;
 };
 
 const WizardContext = createContext<WizardContextValue | null>(null);
@@ -61,6 +77,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
   const [data, setData] = useState<WizardData>({
     setup: defaultSetupValues,
     attendees: defaultAttendeesValues,
+    questions: defaultQuestionsValues,
   });
 
   const [features, setFeatures] = useState<Feature[]>([
@@ -106,6 +123,9 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     },
     setAttendeesValues(v: AttendeesValues) {
       setData((current) => ({ ...current, attendees: v }));
+    },
+    setQuestionsValues(v: QuestionsValues) {
+      setData((current) => ({ ...current, questions: v }));
     },
     totalSteps: enabledSteps.length,
   };

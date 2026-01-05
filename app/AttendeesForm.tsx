@@ -40,7 +40,7 @@ export default function AttendeesForm() {
           form.handleSubmit();
         }}
       >
-        <form.AppField name="arr" mode="array">
+        <form.AppField name="attendees" mode="array">
           {(field) => {
             const isInvalid =
               field.state.meta.isTouched && !field.state.meta.isValid;
@@ -54,7 +54,6 @@ export default function AttendeesForm() {
                     </FieldDescription>
                     <Button
                       type="button"
-                      size="sm"
                       onClick={() => field.pushValue({ name: "", email: "" })}
                     >
                       Add Attendee
@@ -63,19 +62,19 @@ export default function AttendeesForm() {
                 </div>
                 <ScrollArea className={`h-56`}>
                   <div className="flex flex-col gap-4 px-6 pb-4">
-                    {field.state.value.map((_, idx) => {
+                    {field.state.value.map((_, i) => {
                       return (
-                        <FieldSet key={idx}>
+                        <FieldSet key={`attende-${i}`}>
                           <FieldLegend
                             variant="label"
                             className="flex items-center w-full"
                           >
-                            <span>Attendee {idx + 1}</span>
+                            <span>Attendee {i + 1}</span>
                             {field.state.value.length > 1 && (
                               <span
                                 className="ml-auto underline-offset-3 text-xs hover:underline cursor-pointer"
-                                onClick={() => field.removeValue(idx)}
-                                aria-label={`Remove email ${idx + 1}`}
+                                onClick={() => field.removeValue(i)}
+                                aria-label={`Remove attendee ${i + 1}`}
                               >
                                 Remove
                               </span>
@@ -83,13 +82,13 @@ export default function AttendeesForm() {
                           </FieldLegend>
                           <FieldGroup className="gap-2">
                             <form.AppField
-                              name={`arr[${idx}].name`}
+                              name={`attendees[${i}].name`}
                               children={(subField) => (
                                 <subField.TextField placeholder="Name" />
                               )}
                             />
                             <form.AppField
-                              name={`arr[${idx}].email`}
+                              name={`attendees[${i}].email`}
                               children={(subField) => (
                                 <subField.TextField placeholder="Email" />
                               )}

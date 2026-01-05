@@ -19,6 +19,7 @@ import SetupForm from "./SetupForm";
 import WizardProgress from "@/components/WizardProgress";
 import AttendeesForm from "./AttendeesForm";
 import QuestionsForm from "./QuestionsForm";
+import AgendaForm from "./AgendaForm";
 
 function EventWizardDialogInner() {
   const { step } = useWizard();
@@ -45,6 +46,8 @@ function EventWizardDialogInner() {
               return <AttendeesForm />;
             case "Questions":
               return <QuestionsForm />;
+            case "Agenda":
+              return <AgendaForm />;
             default:
               return null;
           }

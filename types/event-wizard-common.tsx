@@ -15,7 +15,7 @@ export type Feature = {
   enabled: boolean;
 };
 
-const zodImage = z
+const imageSchema = z
   .instanceof(File)
   .refine((file) => file.size <= 5 * 1024 * 1024, {
     message: "File size must be less than 5MB.",
@@ -36,7 +36,7 @@ export const SetupSchema = z.object({
   slug: z
     .string()
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Enter a valid URL slug."),
-  image: zodImage,
+  image: imageSchema,
   features: z
     .array(z.string())
     .refine(
@@ -61,15 +61,35 @@ export const QuestionsSchema = z.object({
   questions: z.array(
     z.object({
       name: z.string().min(1, "Question name must be nonempty."),
-      image: zodImage,
+      image: imageSchema,
       options: z
         .array(
           z.object({
             name: z.string().min(1, "Option name must be nonempty."),
-            image: zodImage,
+            image: imageSchema,
           }),
         )
         .min(2, "Question must have at least two options."),
+    }),
+  ),
+});
+
+const timeSchema = z
+  .string()
+  .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time");
+
+export const AgendaSchema = z.object({
+  agendaDates: z.array(
+    z.object({
+      date: z.coerce.date(),
+      items: z.array(
+        z.object({
+          title: z.string().min(1, "Agenda item title must be nonempty."),
+          description: z.string(),
+          startTime: timeSchema,
+          endTime: timeSchema,
+        }),
+      ),
     }),
   ),
 });

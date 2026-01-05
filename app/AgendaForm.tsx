@@ -1,7 +1,6 @@
 import { useWizard } from "@/components/wizard-context";
 import WizardProgress from "@/components/WizardProgress";
 import { useAppForm } from "@/hooks/form";
-import { AttendeesSchema } from "@/types/event-wizard-common";
 
 import {
   Field,
@@ -15,16 +14,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export default function AttendeesForm() {
-  const { step, data, next, setAttendeesValues } = useWizard();
+export default function AgendaForm() {
+  const { step, data, next } = useWizard();
 
   const form = useAppForm({
-    defaultValues: data.attendees,
-    validators: {
-      onBlur: AttendeesSchema,
-    },
+    validators: {},
     onSubmit: async ({ value }) => {
-      setAttendeesValues(value);
       next();
     },
   });
@@ -98,7 +93,6 @@ export default function AttendeesForm() {
                 <div className="px-6 py-4 border-t">
                   <Button
                     type="button"
-                    onClick={() => field.pushValue({ name: "", email: "" })}
                     className="w-full"
                   >
                     Add Attendee
@@ -109,11 +103,7 @@ export default function AttendeesForm() {
           }}
         </form.AppField>
       </form>
-      <WizardProgress
-        onPrev={() => {
-          setAttendeesValues(form.state.values);
-        }}
-      />
+      <WizardProgress onPrev={() => {}} />
     </>
   );
 }

@@ -50,7 +50,7 @@ export default function QuestionsForm() {
                 <div className="border-b px-6 py-4">
                   <FieldLegend variant="label">Questions</FieldLegend>
                   <FieldDescription>
-                    Add questions for your event
+                    Add questions for your event.
                   </FieldDescription>
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </div>

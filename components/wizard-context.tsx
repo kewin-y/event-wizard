@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import {
+  AgendaValues,
   AttendeesValues,
   Feature,
   FeatureName,
@@ -7,34 +8,11 @@ import {
   SetupValues,
 } from "@/types/event-wizard-common";
 
-const defaultSetupValues: SetupValues = {
-  name: "",
-  slug: "",
-  image: null,
-  features: [],
-};
-
-const defaultAttendeesValues: AttendeesValues = {
-  attendees: [{ name: "", email: "" }],
-};
-
-const defaultQuestionsValues: QuestionsValues = {
-  questions: [
-    {
-      name: "",
-      image: null,
-      options: [
-        { name: "Yes", image: null },
-        { name: "No", image: null },
-      ],
-    },
-  ],
-};
-
 type WizardData = {
   setup: SetupValues;
   attendees: AttendeesValues;
   questions: QuestionsValues;
+  agenda: AgendaValues;
 };
 
 const FORM_IDS = {
@@ -66,6 +44,7 @@ type WizardContextValue = {
   setSetupValues: (v: SetupValues) => void;
   setAttendeesValues: (v: AttendeesValues) => void;
   setQuestionsValues: (v: QuestionsValues) => void;
+  setAgendaValues: (v: AgendaValues) => void;
 };
 
 const WizardContext = createContext<WizardContextValue | null>(null);
@@ -74,10 +53,51 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
   const SETUP = { name: "Setup", enabled: true } as const;
   const REVIEW = { name: "Review", enabled: true } as const;
 
+  const defaultSetupValues: SetupValues = {
+    name: "",
+    slug: "",
+    image: null,
+    features: [],
+  };
+
+  const defaultAttendeesValues: AttendeesValues = {
+    attendees: [{ name: "", email: "" }],
+  };
+
+  const defaultQuestionsValues: QuestionsValues = {
+    questions: [
+      {
+        name: "",
+        image: null,
+        options: [
+          { name: "Yes", image: null },
+          { name: "No", image: null },
+        ],
+      },
+    ],
+  };
+
+  const defaultAgendaValues: AgendaValues = {
+    agendaDates: [
+      {
+        date: new Date().toISOString().slice(0, 10),
+        items: [
+          {
+            title: "",
+            description: "",
+            startTime: "",
+            endTime: "",
+          },
+        ],
+      },
+    ],
+  };
+
   const [data, setData] = useState<WizardData>({
     setup: defaultSetupValues,
     attendees: defaultAttendeesValues,
     questions: defaultQuestionsValues,
+    agenda: defaultAgendaValues,
   });
 
   const [features, setFeatures] = useState<Feature[]>([
@@ -126,6 +146,9 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     },
     setQuestionsValues(v: QuestionsValues) {
       setData((current) => ({ ...current, questions: v }));
+    },
+    setAgendaValues(v: AgendaValues) {
+      setData((current) => ({ ...current, agenda: v }));
     },
     totalSteps: enabledSteps.length,
   };

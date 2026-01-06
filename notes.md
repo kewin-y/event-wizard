@@ -82,217 +82,107 @@ export const myAction = action({
 ```
 
 ```tsx
-const formSchema = z.object({
-  name: z
-    .string()
-    .min(3, "Event name must be at least 3 characters")
-    .max(48, "Event name must be no more than 48 characters"),
-  slug: z
-    .string()
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Enter a valid URL slug"),
-  image: z
-    .instanceof(File)
-    .refine((file) => file.size <= 5 * 1024 * 1024, {
-      message: "File size must be less than 5MB",
-    })
-    .refine(
-      (file) =>
-        ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(
-          file.type,
-        ),
-      {
-        message: "File must be a JPEG, PNG, or WebP image",
-      },
-    )
-    .nullish(),
-  features: z
-    .array(z.string())
-    .refine(
-      (value) => value.every((feature) => features.some((f) => f === feature)),
-      {
-        message: "Invalid feature selected.",
-      },
-    ),
-});
-```
+"use client"
 
-```tsx
-"use client";
+import * as React from "react"
+import { CalendarIcon } from "lucide-react"
 
-import * as React from "react";
-import { useForm } from "@tanstack/react-form";
-import { XIcon } from "lucide-react";
-import { toast } from "sonner";
-import { z } from "zod";
-
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Field,
-  FieldContent,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLegend,
-  FieldSet,
-} from "@/components/ui/field";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
-const formSchema = z.object({
-  emails: z
-    .array(
-      z.object({
-        address: z.string().email("Enter a valid email address."),
-      }),
-    )
-    .min(1, "Add at least one email address.")
-    .max(5, "You can add up to 5 email addresses."),
-});
+function formatDate(date: Date | undefined) {
+  if (!date) {
+    return ""
+  }
 
-export function FormTanstackArray() {
-  const form = useForm({
-    defaultValues: {
-      emails: [{ address: "" }],
-    },
-    validators: {
-      onBlur: formSchema,
-    },
-    onSubmit: async ({ value }) => {
-      toast("You submitted the following values:", {
-        description: (
-          <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-            <code>{JSON.stringify(value, null, 2)}</code>
-          </pre>
-        ),
-        position: "bottom-right",
-        classNames: {
-          content: "flex flex-col gap-2",
-        },
-        style: {
-          "--border-radius": "calc(var(--radius)  + 4px)",
-        } as React.CSSProperties,
-      });
-    },
-  });
+  return date.toLocaleDateString("en-US", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  })
+}
+
+function isValidDate(date: Date | undefined) {
+  if (!date) {
+    return false
+  }
+  return !isNaN(date.getTime())
+}
+
+export function Calendar28() {
+  const [open, setOpen] = React.useState(false)
+  const [date, setDate] = React.useState<Date | undefined>(
+    new Date("2025-06-01")
+  )
+  const [month, setMonth] = React.useState<Date | undefined>(date)
+  const [value, setValue] = React.useState(formatDate(date))
 
   return (
-    <Card className="w-full sm:max-w-md">
-      <CardHeader className="border-b">
-        <CardTitle>Contact Emails</CardTitle>
-        <CardDescription>Manage your contact email addresses.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form
-          id="form-tanstack-array"
-          onSubmit={(e) => {
-            e.preventDefault();
-            form.handleSubmit();
+    <div className="flex flex-col gap-3">
+      <Label htmlFor="date" className="px-1">
+        Subscription Date
+      </Label>
+      <div className="relative flex gap-2">
+        <Input
+          id="date"
+          value={value}
+          placeholder="June 01, 2025"
+          className="bg-background pr-10"
+          onChange={(e) => {
+            const date = new Date(e.target.value)
+            setValue(e.target.value)
+            if (isValidDate(date)) {
+              setDate(date)
+              setMonth(date)
+            }
           }}
-        >
-          <form.Field name="emails" mode="array">
-            {(field) => {
-              const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
-              return (
-                <FieldSet className="gap-4">
-                  <FieldLegend variant="label">Email Addresses</FieldLegend>
-                  <FieldDescription>
-                    Add up to 5 email addresses where we can contact you.
-                  </FieldDescription>
-                  <FieldGroup className="gap-4">
-                    {field.state.value.map((_, index) => (
-                      <form.Field
-                        key={index}
-                        name={`emails[${index}].address`}
-                        children={(subField) => {
-                          const isSubFieldInvalid =
-                            subField.state.meta.isTouched &&
-                            !subField.state.meta.isValid;
-                          return (
-                            <Field
-                              orientation="horizontal"
-                              data-invalid={isSubFieldInvalid}
-                            >
-                              <FieldContent>
-                                <InputGroup>
-                                  <InputGroupInput
-                                    id={`form-tanstack-array-email-${index}`}
-                                    name={subField.name}
-                                    value={subField.state.value}
-                                    onBlur={subField.handleBlur}
-                                    onChange={(e) =>
-                                      subField.handleChange(e.target.value)
-                                    }
-                                    aria-invalid={isSubFieldInvalid}
-                                    placeholder="name@example.com"
-                                    type="email"
-                                    autoComplete="email"
-                                  />
-                                  {field.state.value.length > 1 && (
-                                    <InputGroupAddon align="inline-end">
-                                      <InputGroupButton
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon-xs"
-                                        onClick={() => field.removeValue(index)}
-                                        aria-label={`Remove email ${index + 1}`}
-                                      >
-                                        <XIcon />
-                                      </InputGroupButton>
-                                    </InputGroupAddon>
-                                  )}
-                                </InputGroup>
-                                {isSubFieldInvalid && (
-                                  <FieldError
-                                    errors={subField.state.meta.errors}
-                                  />
-                                )}
-                              </FieldContent>
-                            </Field>
-                          );
-                        }}
-                      />
-                    ))}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => field.pushValue({ address: "" })}
-                      disabled={field.state.value.length >= 5}
-                    >
-                      Add Email Address
-                    </Button>
-                  </FieldGroup>
-                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                </FieldSet>
-              );
-            }}
-          </form.Field>
-        </form>
-      </CardContent>
-      <CardFooter className="border-t">
-        <Field orientation="horizontal">
-          <Button type="button" variant="outline" onClick={() => form.reset()}>
-            Reset
-          </Button>
-          <Button type="submit" form="form-tanstack-array">
-            Save
-          </Button>
-        </Field>
-      </CardFooter>
-    </Card>
-  );
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown") {
+              e.preventDefault()
+              setOpen(true)
+            }
+          }}
+        />
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              id="date-picker"
+              variant="ghost"
+              className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
+            >
+              <CalendarIcon className="size-3.5" />
+              <span className="sr-only">Select date</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-auto overflow-hidden p-0"
+            align="end"
+            alignOffset={-8}
+            sideOffset={10}
+          >
+            <Calendar
+              mode="single"
+              selected={date}
+              captionLayout="dropdown"
+              month={month}
+              onMonthChange={setMonth}
+              onSelect={(date) => {
+                setDate(date)
+                setValue(formatDate(date))
+                setOpen(false)
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+    </div>
+  )
 }
 ```

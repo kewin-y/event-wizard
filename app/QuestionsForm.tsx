@@ -55,101 +55,104 @@ export default function QuestionsForm() {
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </div>
                 <ScrollArea className={`h-96`}>
-                  <div className="flex flex-col gap-4">
-                    {field.state.value.map((_, i) => {
-                      return (
-                        <FieldSet
-                          key={`question-${i}`}
-                          className="border-b px-6 pb-4 last:border-b-0 last:pb-0"
+                  <FieldGroup>
+                    {field.state.value.map((_, i) => (
+                      <FieldSet
+                        key={`question-${i}`}
+                        className="border-b px-6 pb-4 last:border-b-0 last:pb-0"
+                      >
+                        <FieldLegend
+                          variant="label"
+                          className="flex items-center w-full"
                         >
-                          <FieldLegend
-                            variant="label"
-                            className="flex items-center w-full"
-                          >
-                            <span>Question {i + 1}</span>
-                            {field.state.value.length > 1 && (
-                              <span
-                                className="ml-auto underline-offset-3 text-xs hover:underline cursor-pointer"
-                                onClick={() => field.removeValue(i)}
-                                aria-label={`Remove email ${i + 1}`}
-                              >
-                                Remove
-                              </span>
-                            )}
-                          </FieldLegend>
-                          <FieldGroup className="gap-2">
-                            <form.AppField
-                              name={`questions[${i}].name`}
-                              children={(subField) => (
-                                <subField.TextField placeholder="Name" />
-                              )}
-                            />
-                            <form.AppField
-                              name={`questions[${i}].image`}
-                              children={(subField) => (
-                                <subField.FileUploadField accept="image/webp, image/png, image/jpeg, image/jpg" />
-                              )}
-                            />
-                          </FieldGroup>
+                          <span>Question {i + 1}</span>
+                          {field.state.value.length > 1 && (
+                            <span
+                              className="ml-auto underline-offset-3 text-xs hover:underline cursor-pointer"
+                              onClick={() => field.removeValue(i)}
+                              aria-label={`Remove email ${i + 1}`}
+                            >
+                              Remove
+                            </span>
+                          )}
+                        </FieldLegend>
+                        <FieldGroup className="gap-2">
                           <form.AppField
-                            name={`questions[${i}].options`}
-                            mode="array"
-                          >
-                            {(subField) => (
-                              <FieldSet>
-                                {subField.state.value.map((_, j) => (
-                                  <FieldSet key={`option-${i}${j}`}>
-                                    <FieldLegend
-                                      variant="label"
-                                      className="flex items-center w-full"
-                                    >
-                                      <span>Option {j + 1}</span>
-                                      {subField.state.value.length > 2 && (
-                                        <span
-                                          className="ml-auto underline-offset-3 text-xs hover:underline cursor-pointer"
-                                          onClick={() =>
-                                            subField.removeValue(j)
-                                          }
-                                          aria-label={`Remove Option ${j + 1}`}
-                                        >
-                                          Remove
-                                        </span>
-                                      )}
-                                    </FieldLegend>
-                                    <FieldGroup className="gap-2">
-                                      <form.AppField
-                                        name={`questions[${i}].options[${j}].name`}
-                                        children={(subField_) => (
-                                          <subField_.TextField placeholder="Name" />
-                                        )}
-                                      />
-                                      <form.AppField
-                                        name={`questions[${i}].options[${j}].image`}
-                                        children={(subField_) => (
-                                          <subField_.FileUploadField accept="image/webp, image/png, image/jpeg, image/jpg" />
-                                        )}
-                                      />
-                                    </FieldGroup>
-                                  </FieldSet>
-                                ))}
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    subField.pushValue({
-                                      name: "",
-                                      image: null,
-                                    });
-                                  }}
-                                >
-                                  Add Option
-                                </Button>
-                              </FieldSet>
+                            name={`questions[${i}].name`}
+                            children={(subField) => (
+                              <subField.TextField placeholder="Name" />
                             )}
-                          </form.AppField>
-                        </FieldSet>
-                      );
-                    })}
-                  </div>
+                          />
+                          <form.AppField
+                            name={`questions[${i}].image`}
+                            children={(subField) => (
+                              <subField.FileUploadField accept="image/webp, image/png, image/jpeg, image/jpg" />
+                            )}
+                          />
+                        </FieldGroup>
+                        <div className="flex items-center">
+                          <div className="grow border-t border-border" />
+                          <span className="mx-3 text-sm text-muted-foreground">
+                            Options
+                          </span>
+                          <div className="grow border-t border-border" />
+                        </div>
+                        <form.AppField
+                          name={`questions[${i}].options`}
+                          mode="array"
+                        >
+                          {(subField) => (
+                            <FieldSet>
+                              {subField.state.value.map((_, j) => (
+                                <FieldSet key={`option-${i}${j}`}>
+                                  <FieldLegend
+                                    variant="label"
+                                    className="flex items-center w-full"
+                                  >
+                                    <span>Option {j + 1}</span>
+                                    {subField.state.value.length > 2 && (
+                                      <span
+                                        className="ml-auto underline-offset-3 text-xs hover:underline cursor-pointer"
+                                        onClick={() => subField.removeValue(j)}
+                                        aria-label={`Remove Option ${j + 1}`}
+                                      >
+                                        Remove
+                                      </span>
+                                    )}
+                                  </FieldLegend>
+                                  <FieldGroup className="gap-2">
+                                    <form.AppField
+                                      name={`questions[${i}].options[${j}].name`}
+                                      children={(subField_) => (
+                                        <subField_.TextField placeholder="Name" />
+                                      )}
+                                    />
+                                    <form.AppField
+                                      name={`questions[${i}].options[${j}].image`}
+                                      children={(subField_) => (
+                                        <subField_.FileUploadField accept="image/webp, image/png, image/jpeg, image/jpg" />
+                                      )}
+                                    />
+                                  </FieldGroup>
+                                </FieldSet>
+                              ))}
+                              <Button
+                                variant="secondary"
+                                onClick={() => {
+                                  subField.pushValue({
+                                    name: "",
+                                    image: null,
+                                  });
+                                }}
+                              >
+                                Add Option
+                              </Button>
+                            </FieldSet>
+                          )}
+                        </form.AppField>
+                      </FieldSet>
+                    ))}
+                  </FieldGroup>
                 </ScrollArea>
                 <div className="px-6 py-4 border-t">
                   <Button
@@ -174,7 +177,11 @@ export default function QuestionsForm() {
           }}
         </form.AppField>
       </form>
-      <WizardProgress />
+      <WizardProgress
+        onPrev={() => {
+          setQuestionsValues(form.state.values);
+        }}
+      />
     </>
   );
 }

@@ -27,25 +27,26 @@ export default defineSchema({
   }).index("by_event", ["eventId"]),
   questions: defineTable({
     eventId: v.id("events"),
-    title: v.string(),
+    name: v.string(),
+    imageStorageId: v.optional(v.id("_storage")),
     // NOTE Since this is a small project, I won't add the abiltiy to answer questions
     options: v.array(
       v.object({
-        title: v.string(),
+        name: v.string(),
+        imageStorageId: v.optional(v.id("_storage")),
         order: v.number(),
       }),
     ),
-    imageStorageId: v.id("_storage"),
   }).index("by_event", ["eventId"]),
   agendaDates: defineTable({
     eventId: v.id("events"),
-    value: v.number(),
+    date: v.number(),
     items: v.array(
       v.object({
         title: v.string(),
         description: v.optional(v.string()),
-        startTime: v.optional(v.number()),
-        endTime: v.optional(v.number()),
+        startTime: v.optional(v.string()),
+        endTime: v.optional(v.string()),
       }),
     ),
   }),

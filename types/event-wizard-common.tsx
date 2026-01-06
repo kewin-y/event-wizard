@@ -49,51 +49,58 @@ export const SetupSchema = z.object({
 });
 
 export const AttendeesSchema = z.object({
-  attendees: z.array(
-    z.object({
-      name: z.string().min(1, "Attendee name must be nonempty."),
-      email: z.email({ error: "Enter a valid email address." }),
-    }),
-  ),
+  attendees: z
+    .array(
+      z.object({
+        name: z.string().min(1, "Attendee name must be nonempty."),
+        email: z.email({ error: "Enter a valid email address." }),
+      }),
+    )
+    .min(1, "Must have at least one attendee."),
 });
 
 export const QuestionsSchema = z.object({
-  questions: z.array(
-    z.object({
-      name: z.string().min(1, "Question name must be nonempty."),
-      image: imageSchema,
-      options: z
-        .array(
-          z.object({
-            name: z.string().min(1, "Option name must be nonempty."),
-            image: imageSchema,
-          }),
-        )
-        .min(2, "Question must have at least two options."),
-    }),
-  ),
+  questions: z
+    .array(
+      z.object({
+        name: z.string().min(1, "Question name must be nonempty."),
+        image: imageSchema,
+        options: z
+          .array(
+            z.object({
+              name: z.string().min(1, "Option name must be nonempty."),
+              image: imageSchema,
+            }),
+          )
+          .min(2, "Question must have at least two options."),
+      }),
+    )
+    .min(1, "Must have at least one question."),
 });
 
 const timeSchema = z
   .string()
-  .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time");
+  .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time.");
 
 export const AgendaSchema = z.object({
-  agendaDates: z.array(
-    z.object({
-      date: z.coerce.date(),
-      items: z.array(
-        z.object({
-          title: z.string().min(1, "Agenda item title must be nonempty."),
-          description: z.string(),
-          startTime: timeSchema,
-          endTime: timeSchema,
-        }),
-      ),
-    }),
-  ),
+  agendaDates: z
+    .array(
+      z.object({
+        date: z.iso.date({ error: "Please enter a valid date (YYYY-MM-DD)." }),
+        items: z.array(
+          z.object({
+            title: z.string().min(1, "Agenda item title must be nonempty."),
+            description: z.string(),
+            startTime: timeSchema,
+            endTime: timeSchema,
+          }),
+        ),
+      }),
+    )
+    .min(1, "Must have at least one agenda date."),
 });
 
 export type SetupValues = z.infer<typeof SetupSchema>;
 export type AttendeesValues = z.infer<typeof AttendeesSchema>;
 export type QuestionsValues = z.infer<typeof QuestionsSchema>;
+export type AgendaValues = z.infer<typeof AgendaSchema>;

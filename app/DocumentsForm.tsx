@@ -139,10 +139,8 @@ export default function DocumentsForm() {
   >("none");
 
   const [visitStack, setVisitStack] = useState<string[]>(["root"]);
-  const currentFolder = findDocument(
-    visitStack[visitStack.length - 1],
-    tree[0],
-  );
+  const currentFolder =
+    findDocument(visitStack[visitStack.length - 1], tree[0]) || tree[0];
 
   const folderForm = useAppForm({
     defaultValues: {
@@ -169,12 +167,18 @@ export default function DocumentsForm() {
             <Button
               variant="outline"
               size="icon-sm"
-              disabled={currentFolder && currentFolder.id === "root"}
+              disabled={currentFolder.id === "root"}
+              onClick={() =>
+                setVisitStack((current) => {
+                  current.pop();
+                  return current;
+                })
+              }
             >
               <CornerLeftUp />
             </Button>
 
-            {currentFolder && <span>{currentFolder.name}</span>}
+            <span>{currentFolder!.name}</span>
 
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
@@ -266,7 +270,29 @@ export default function DocumentsForm() {
           <ScrollArea className="h-72">
             {currentFolder.type === "folder" &&
             currentFolder.children.length > 0 ? (
-              <FieldSet className="px-6 pb-4"></FieldSet>
+              <FieldSet className="px-6 pb-4 gap-2">
+                {currentFolder.children
+                  .filter((child) => child.type === "folder")
+                  .sort((a, b) =>
+                    a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+                  )
+                  .map((folder) => (
+                    <Button
+                      key={folder.id}
+                      size="sm"
+                      variant="outline"
+                      className="flex flex-col items-start"
+                      onClick={() =>
+                        setVisitStack((current) => [...current, folder.id])
+                      }
+                    >
+                      <span className="flex gap-2 items-center">
+                        <FolderIcon />
+                        {folder.name}
+                      </span>
+                    </Button>
+                  ))}
+              </FieldSet>
             ) : (
               <div className="px-6 w-full text-muted-foreground text-sm">
                 <p>Folder is empty.</p>

@@ -80,13 +80,14 @@ export const QuestionsSchema = z.object({
 
 const timeSchema = z
   .string()
-  .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time.");
+  .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time.")
+  .or(z.literal(""));
 
 export const AgendaSchema = z.object({
   agendaDates: z
     .array(
       z.object({
-        date: z.iso.date({ error: "Please enter a valid date (YYYY-MM-DD)." }),
+        date: z.date(),
         items: z.array(
           z.object({
             title: z.string().min(1, "Agenda item title must be nonempty."),

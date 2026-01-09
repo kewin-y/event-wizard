@@ -13,7 +13,7 @@ export default defineSchema({
     imageStorageId: v.optional(v.id("_storage")),
     userId: v.id("users"),
     featuresEnabled: v.object({
-      attendees: v.boolean(),
+      attendees: v.boolean(), // Could make individual features optional
       questions: v.boolean(),
       agenda: v.boolean(),
       documents: v.boolean(),
@@ -29,27 +29,27 @@ export default defineSchema({
     eventId: v.id("events"),
     name: v.string(),
     imageStorageId: v.optional(v.id("_storage")),
-    // NOTE Since this is a small project, I won't add the abiltiy to answer questions
-    options: v.array(
-      v.object({
-        name: v.string(),
-        imageStorageId: v.optional(v.id("_storage")),
-        order: v.number(),
-      }),
-    ),
   }).index("by_event", ["eventId"]),
+  questionObjects: defineTable({
+    eventId: v.id("events"),
+    questionId: v.id("questions"),
+    name: v.string(),
+    imageStorageId: v.optional(v.id("_storage")),
+    order: v.number(),
+  }).index("by_question", ["questionId"]),
   agendaDates: defineTable({
     eventId: v.id("events"),
     date: v.number(),
-    items: v.array(
-      v.object({
-        title: v.string(),
-        description: v.optional(v.string()),
-        startTime: v.optional(v.string()),
-        endTime: v.optional(v.string()),
-      }),
-    ),
-  }),
+    items: v.array(v.object({})),
+  }).index("by_event", ["eventId"]),
+  agendaItems: defineTable({
+    eventId: v.id("events"),
+    agendaDateId: v.id("agendaDates"),
+    title: v.string(),
+    description: v.optional(v.string()),
+    startTime: v.optional(v.string()),
+    endTime: v.optional(v.string()),
+  }).index("by_agendaDate", ["agendaDateId"]),
   documentItems: defineTable({
     eventId: v.id("events"),
     parentId: v.optional(v.id("documentItems")), // null = root level, otherwise parent folder
@@ -57,8 +57,6 @@ export default defineSchema({
 
     // Common
     name: v.string(),
-    createdAt: v.number(),
-    updatedAt: v.number(),
 
     // Files
     storageId: v.optional(v.id("_storage")),
@@ -67,10 +65,7 @@ export default defineSchema({
 
     // Links
     url: v.optional(v.string()),
-  })
-    .index("by_event", ["eventId"])
-    .index("by_parent", ["parentId"])
-    .index("by_event_and_parent", ["eventId", "parentId"]),
+  }).index("by_event_and_parent", ["eventId", "parentId"]),
   zoomMeetings: defineTable({
     eventId: v.id("events"),
     password: v.optional(v.string()),

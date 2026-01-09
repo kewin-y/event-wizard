@@ -11,7 +11,11 @@ export const getEvents = query({
       throw new Error("Not authenticated.");
     }
 
-    const events = await ctx.db.query("events").withIndex("by_user").collect();
+    // collect has upper limit (4000 documents)
+    const events = await ctx.db
+      .query("events")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
 
     return events;
   },

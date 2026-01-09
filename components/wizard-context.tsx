@@ -41,6 +41,7 @@ type WizardContextValue = {
   prev: () => void;
 
   data: WizardData;
+
   setSetupValues: (v: SetupValues) => void;
   setAttendeesValues: (v: AttendeesValues) => void;
   setQuestionsValues: (v: QuestionsValues) => void;
@@ -80,7 +81,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
   const defaultAgendaValues: AgendaValues = {
     agendaDates: [
       {
-        date: new Date().toISOString().slice(0, 10),
+        date: new Date(),
         items: [
           {
             title: "",

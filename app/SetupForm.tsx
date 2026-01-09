@@ -94,6 +94,7 @@ export default function SetupForm() {
                             checked={field.state.value.includes(name)}
                             onCheckedChange={(checked) => {
                               toggleFeature(name);
+
                               if (checked) {
                                 field.pushValue(name);
                               } else {

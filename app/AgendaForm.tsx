@@ -1,24 +1,16 @@
 import { useWizard } from "@/components/wizard-context";
 import WizardProgress from "@/components/WizardProgress";
 import { useAppForm } from "@/hooks/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AgendaSchema } from "@/types/event-wizard-common";
 import {
-  Field,
-  FieldContent,
   FieldDescription,
   FieldError,
   FieldGroup,
-  FieldLabel,
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
-import { PopoverTrigger } from "@radix-ui/react-popover";
-import { Popover, PopoverContent } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
 
 export default function AgendaForm() {
   const { step, data, next, setAgendaValues } = useWizard();
@@ -29,6 +21,7 @@ export default function AgendaForm() {
       onBlur: AgendaSchema,
     },
     onSubmit: async ({ value }) => {
+      setAgendaValues(value);
       next();
     },
   });
@@ -53,11 +46,12 @@ export default function AgendaForm() {
                 <div className="border-b px-6 py-4">
                   <FieldLegend variant="label">Agenda</FieldLegend>
                   <FieldDescription>
-                    Add entries to your event agenda
+                    Add entries to your event agenda. Times are based on your
+                    local timezone.
                   </FieldDescription>
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </div>
-                <ScrollArea>
+                <ScrollArea className="h-72">
                   <FieldGroup>
                     {field.state.value.map((_, i) => (
                       <FieldSet
@@ -129,9 +123,34 @@ export default function AgendaForm() {
                                         <subField_.TextField placeholder="Description (Optional)" />
                                       )}
                                     />
+                                    <form.AppField
+                                      name={`agendaDates[${i}].items[${j}].startTime`}
+                                      children={(subField_) => (
+                                        <subField_.TimeField label="Start Time" />
+                                      )}
+                                    />
+                                    <form.AppField
+                                      name={`agendaDates[${i}].items[${j}].endTime`}
+                                      children={(subField_) => (
+                                        <subField_.TimeField label="End Time" />
+                                      )}
+                                    />
                                   </FieldGroup>
                                 </FieldSet>
                               ))}
+                              <Button
+                                variant="secondary"
+                                onClick={() => {
+                                  subField.pushValue({
+                                    title: "",
+                                    description: "",
+                                    startTime: "",
+                                    endTime: "",
+                                  });
+                                }}
+                              >
+                                Add Option
+                              </Button>
                             </FieldSet>
                           )}
                         </form.AppField>
@@ -145,7 +164,7 @@ export default function AgendaForm() {
                     type="button"
                     onClick={() =>
                       field.pushValue({
-                        date: new Date().toISOString().slice(0, 10),
+                        date: new Date(),
                         items: [
                           {
                             title: "",

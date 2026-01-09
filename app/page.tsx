@@ -1,9 +1,23 @@
-import { WizardProvider } from "@/components/wizard-context";
 import EventGrid from "./EventGrid";
 import EventWizardDialog from "./EventWizardDialog";
 import SignOutButton from "@/components/SignOutButton";
+import { preloadQuery } from "convex/nextjs";
+import { api } from "@/convex/_generated/api";
+import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 
-export default function Home() {
+export default async function Home() {
+  const token = await convexAuthNextjsToken();
+
+  if (!token) return null;
+
+  const preloadedEvents = await preloadQuery(
+    api.events.getEvents,
+    {},
+    { token },
+  );
+
+  console.log(preloadedEvents);
+
   return (
     <>
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b p-4 flex flex-row justify-between items-center shadow-sm">
@@ -14,7 +28,7 @@ export default function Home() {
         <SignOutButton />
       </header>
       <main className="p-12 flex flex-col gap-12">
-        <EventGrid />
+        <EventGrid preloadedEvents={preloadedEvents}/>
         <EventWizardDialog />
       </main>
     </>

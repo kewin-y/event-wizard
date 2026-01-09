@@ -33,6 +33,8 @@ import {
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { AddItemDropdown } from "@/components/AddItemDropdown";
+import { useAppForm } from "@/hooks/form";
+import * as z from "zod";
 
 function addDocument(
   name: string,
@@ -42,19 +44,18 @@ function addDocument(
 ): DocumentItem[] {
   return tree.map((documentItem) => {
     if (documentItem.type === "folder") {
-      if (documentItem.id === parentId) {
+      if (documentItem.id === parentId)
         return {
           ...documentItem,
           children: [
             ...documentItem.children,
             {
-              id: new Crypto().randomUUID(),
+              id: crypto.randomUUID(),
               name: name,
               ...data,
             },
           ],
         };
-      }
 
       return {
         ...documentItem,
@@ -79,7 +80,7 @@ function addFolder(
           children: [
             ...documentItem.children,
             {
-              id: new Crypto().randomUUID(),
+              id: crypto.randomUUID(),
               name: name,
               type: "folder",
               children: [],
@@ -97,9 +98,29 @@ function addFolder(
   });
 }
 
+function findDocument(
+  id: string,
+  root: DocumentItem,
+): DocumentItem | undefined {
+  if (id === root.id) return root;
+
+  const children = root.type === "folder" ? root.children : [];
+
+  for (const child of children) {
+    const found = findDocument(id, child);
+    if (found) return found;
+  }
+
+  return undefined;
+}
+
 const FOLDER_FORM_ID = "add-item-folder";
 const LINK_FORM_ID = "add-item-link";
 const FILE_FORM_ID = "add-file";
+
+const folderFormSchema = z.object({
+  name: z.string().nonempty({ error: "Folder name must be nonempty" }),
+});
 
 export default function DocumentsForm() {
   const { step } = useWizard();
@@ -117,8 +138,24 @@ export default function DocumentsForm() {
     "none" | "folder" | "file" | "link"
   >("none");
 
-  const [visitStack, setVisitStack] = useState([tree[0]]);
-  const currentFolder = visitStack[visitStack.length - 1];
+  const [visitStack, setVisitStack] = useState<string[]>(["root"]);
+  const currentFolder = findDocument(
+    visitStack[visitStack.length - 1],
+    tree[0],
+  );
+
+  const folderForm = useAppForm({
+    defaultValues: {
+      name: "",
+    },
+    validators: {
+      onSubmit: folderFormSchema,
+    },
+    onSubmit: async ({ value }) => {
+      if (currentFolder)
+        setTree((current) => addFolder(value.name, currentFolder.id, current));
+    },
+  });
 
   return (
     <>
@@ -132,12 +169,12 @@ export default function DocumentsForm() {
             <Button
               variant="outline"
               size="icon-sm"
-              disabled={currentFolder.id === "root"}
+              disabled={currentFolder && currentFolder.id === "root"}
             >
               <CornerLeftUp />
             </Button>
 
-            <span>{currentFolder.name}</span>
+            {currentFolder && <span>{currentFolder.name}</span>}
 
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
@@ -179,11 +216,20 @@ export default function DocumentsForm() {
                   </>
                 )}
                 {addDocumentMode === "folder" && (
-                  <form className="space-y-3 px-2 py-2" id={FOLDER_FORM_ID}>
-                    <Field>
-                      <FieldLabel>Folder Name</FieldLabel>
-                      <Input />
-                    </Field>
+                  <form
+                    className="space-y-3 px-2 py-2"
+                    id={FOLDER_FORM_ID}
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      folderForm.handleSubmit();
+                    }}
+                  >
+                    <folderForm.AppField
+                      name="name"
+                      children={(field) => (
+                        <field.TextField label="Folder Name" />
+                      )}
+                    />
                     <Actions
                       formId={FOLDER_FORM_ID}
                       onCancel={() => setAddDocumentMode("none")}

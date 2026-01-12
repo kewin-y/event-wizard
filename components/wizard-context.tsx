@@ -13,6 +13,7 @@ type WizardData = {
   attendees: AttendeesValues;
   questions: QuestionsValues;
   agenda: AgendaValues;
+  documents: DocumentItem[];
 };
 
 const FORM_IDS = {
@@ -46,6 +47,7 @@ type WizardContextValue = {
   setAttendeesValues: (v: AttendeesValues) => void;
   setQuestionsValues: (v: QuestionsValues) => void;
   setAgendaValues: (v: AgendaValues) => void;
+  setDocuments: (v: DocumentItem[]) => void;
 };
 
 const WizardContext = createContext<WizardContextValue | null>(null);
@@ -94,11 +96,21 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     ],
   };
 
+  const defaultDocumentsValues: DocumentItem[] = [
+    {
+      id: "root",
+      name: "/",
+      type: "folder",
+      children: [],
+    },
+  ];
+
   const [data, setData] = useState<WizardData>({
     setup: defaultSetupValues,
     attendees: defaultAttendeesValues,
     questions: defaultQuestionsValues,
     agenda: defaultAgendaValues,
+    documents: defaultDocumentsValues,
   });
 
   const [features, setFeatures] = useState<Feature[]>([
@@ -139,17 +151,20 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
       }
     },
     data: data,
-    setSetupValues(v: SetupValues) {
+    setSetupValues(v) {
       setData((current) => ({ ...current, setup: v }));
     },
-    setAttendeesValues(v: AttendeesValues) {
+    setAttendeesValues(v) {
       setData((current) => ({ ...current, attendees: v }));
     },
-    setQuestionsValues(v: QuestionsValues) {
+    setQuestionsValues(v) {
       setData((current) => ({ ...current, questions: v }));
     },
-    setAgendaValues(v: AgendaValues) {
+    setAgendaValues(v) {
       setData((current) => ({ ...current, agenda: v }));
+    },
+    setDocuments(v) {
+      setData((current) => ({ ...current, documents: v }));
     },
     totalSteps: enabledSteps.length,
   };

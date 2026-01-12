@@ -1,16 +1,11 @@
 import WizardProgress from "@/components/WizardProgress";
 import { useWizard } from "@/components/wizard-context";
-import {
-  CornerLeftUp,
-  FileIcon,
-  FolderIcon,
-  LinkIcon,
-} from "lucide-react";
+import { CornerLeftUp, FileIcon, FolderIcon, LinkIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { FieldDescription, FieldLegend, FieldSet } from "@/components/ui/field";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
   AddDocumentActions,
@@ -127,16 +122,9 @@ function findDocument(
 }
 
 export default function DocumentsForm() {
-  const { step } = useWizard();
+  const { step, data, setDocuments } = useWizard();
 
-  const [tree, setTree] = useState<DocumentItem[]>([
-    {
-      id: "root",
-      name: "/",
-      type: "folder",
-      children: [],
-    },
-  ]);
+  const [tree, setTree] = useState<DocumentItem[]>(data.documents);
 
   const [visitStack, setVisitStack] = useState<string[]>(["root"]);
   const currentFolder =
@@ -144,7 +132,14 @@ export default function DocumentsForm() {
 
   return (
     <>
-      <form className="border-b border-t" id={step.formId}>
+      <form
+        className="border-b border-t"
+        id={step.formId}
+        onSubmit={(e) => {
+          e.preventDefault();
+          setDocuments(tree);
+        }}
+      >
         <FieldSet className="gap-4">
           <div className="border-b px-6 py-4">
             <FieldLegend variant="label">Documents</FieldLegend>
@@ -217,7 +212,9 @@ export default function DocumentsForm() {
                         }
                       >
                         <FolderIcon size={16} />
-                        {folder.name}
+                        <span className="w-90 text-left whitespace-nowrap text-ellipsis overflow-hidden">
+                          {folder.name}
+                        </span>
                       </Button>
                       <FolderActions
                         defaultName={folder.name}
@@ -247,7 +244,9 @@ export default function DocumentsForm() {
                         target="_blank"
                       >
                         <LinkIcon size={16} />
-                        {link.name}
+                        <span className="w-90 text-left whitespace-nowrap text-ellipsis overflow-hidden">
+                          {link.name}
+                        </span>
                       </Link>
                       <LinkActions
                         defaultUrl={link.value}
@@ -269,10 +268,12 @@ export default function DocumentsForm() {
                   )
                   .map((file) => (
                     <ButtonGroup key={file.id} className="w-full">
-                      <span className="inline-flex items-center h-9 px-3 py-2 gap-2 text-sm flex-1 justify-start rounded-none">
+                      <div className="inline-flex items-center h-9 px-3 py-2 gap-2 text-sm flex-1 justify-start rounded-none">
                         <FileIcon size={16} />
-                        {file.name}
-                      </span>
+                        <span className="w-90 text-left whitespace-nowrap text-ellipsis overflow-hidden">
+                          {file.name}
+                        </span>
+                      </div>
                       <FileActions
                         onDelete={() =>
                           setTree((current) => deleteDocument(file.id, current))
@@ -291,7 +292,7 @@ export default function DocumentsForm() {
           </ScrollArea>
         </FieldSet>
       </form>
-      <WizardProgress />
+      <WizardProgress onPrev={() => setDocuments(tree)} />
     </>
   );
 }

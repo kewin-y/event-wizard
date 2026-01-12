@@ -122,7 +122,7 @@ function findDocument(
 }
 
 export default function DocumentsForm() {
-  const { step, data, setDocuments } = useWizard();
+  const { data, setDocuments } = useWizard();
 
   const [tree, setTree] = useState<DocumentItem[]>(data.documents);
 
@@ -132,14 +132,7 @@ export default function DocumentsForm() {
 
   return (
     <>
-      <form
-        className="border-b border-t"
-        id={step.formId}
-        onSubmit={(e) => {
-          e.preventDefault();
-          setDocuments(tree);
-        }}
-      >
+      <div className="border-b border-t">
         <FieldSet className="gap-4">
           <div className="border-b px-6 py-4">
             <FieldLegend variant="label">Documents</FieldLegend>
@@ -291,8 +284,12 @@ export default function DocumentsForm() {
             )}
           </ScrollArea>
         </FieldSet>
-      </form>
-      <WizardProgress onPrev={() => setDocuments(tree)} />
+      </div>
+      <WizardProgress
+        onPrev={() => setDocuments(tree)}
+        onNext={() => setDocuments(tree)}
+        dontUseForm
+      />
     </>
   );
 }

@@ -7,11 +7,15 @@ import { useWizard } from "./wizard-context";
 // It's needed because we must lift the state to the wizard context on step changes
 // This state depends on the current form (step)
 export default function WizardProgress({
+  dontUseForm = false,
   onPrev = () => {},
+  onNext = () => {},
 }: {
+  dontUseForm?: boolean;
   onPrev?: () => void;
+  onNext?: () => void;
 }) {
-  const { step, totalSteps, prev } = useWizard();
+  const { step, totalSteps, prev, next } = useWizard();
   return (
     <DialogFooter>
       <div className="flex flex-col gap-4 w-full">
@@ -34,9 +38,23 @@ export default function WizardProgress({
           >
             Previous
           </Button>
-          <Button type="submit" form={step.formId}>
-            Next
-          </Button>
+          {!dontUseForm && (
+            <Button type="submit" form={step.formId}>
+              Next
+            </Button>
+          )}
+          {/* Why */}
+          {dontUseForm && (
+            <Button
+              type="submit"
+              onClick={() => {
+                onNext();
+                next();
+              }}
+            >
+              Next
+            </Button>
+          )}
         </div>
       </div>
     </DialogFooter>

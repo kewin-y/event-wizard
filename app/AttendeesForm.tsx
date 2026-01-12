@@ -4,8 +4,6 @@ import { useAppForm } from "@/hooks/form";
 import { AttendeesSchema } from "@/types/event-wizard-common";
 
 import {
-  Field,
-  FieldContent,
   FieldDescription,
   FieldError,
   FieldGroup,

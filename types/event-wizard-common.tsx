@@ -90,7 +90,9 @@ export const AgendaSchema = z.object({
         date: z.date(),
         items: z.array(
           z.object({
-            title: z.string().min(1, "Agenda item title must be nonempty."),
+            title: z
+              .string()
+              .nonempty({ error: "Agenda item title must be nonempty." }),
             description: z.string(),
             startTime: timeSchema,
             endTime: timeSchema,
@@ -101,7 +103,16 @@ export const AgendaSchema = z.object({
     .min(1, "Must have at least one agenda date."),
 });
 
+export const ZoomSchema = z.object({
+  meetingId: z.string().nonempty({ error: "Meeting ID must be nonempty." }),
+  meetingPassword: z
+    .string()
+    .nonempty({ error: "Meeting password must be nonempty." }),
+  url: z.url({ hostname: /^zoom.us$/, error: "Enter a valid Zoom URL" }),
+});
+
 export type SetupValues = z.infer<typeof SetupSchema>;
 export type AttendeesValues = z.infer<typeof AttendeesSchema>;
 export type QuestionsValues = z.infer<typeof QuestionsSchema>;
 export type AgendaValues = z.infer<typeof AgendaSchema>;
+export type ZoomValues = z.infer<typeof ZoomSchema>;

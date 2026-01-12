@@ -6,6 +6,7 @@ import {
   FeatureName,
   QuestionsValues,
   SetupValues,
+  ZoomValues,
 } from "@/types/event-wizard-common";
 
 type WizardData = {
@@ -14,6 +15,7 @@ type WizardData = {
   questions: QuestionsValues;
   agenda: AgendaValues;
   documents: DocumentItem[];
+  zoom: ZoomValues;
 };
 
 const FORM_IDS = {
@@ -48,6 +50,7 @@ type WizardContextValue = {
   setQuestionsValues: (v: QuestionsValues) => void;
   setAgendaValues: (v: AgendaValues) => void;
   setDocuments: (v: DocumentItem[]) => void;
+  setZoomValues: (v: ZoomValues) => void;
 };
 
 const WizardContext = createContext<WizardContextValue | null>(null);
@@ -105,12 +108,19 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     },
   ];
 
+  const defaultZoomValues: ZoomValues = {
+    meetingId: "",
+    meetingPassword: "",
+    url: "",
+  };
+
   const [data, setData] = useState<WizardData>({
     setup: defaultSetupValues,
     attendees: defaultAttendeesValues,
     questions: defaultQuestionsValues,
     agenda: defaultAgendaValues,
     documents: defaultDocumentsValues,
+    zoom: defaultZoomValues,
   });
 
   const [features, setFeatures] = useState<Feature[]>([
@@ -165,6 +175,9 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     },
     setDocuments(v) {
       setData((current) => ({ ...current, documents: v }));
+    },
+    setZoomValues(v) {
+      setData((current) => ({ ...current, zoom: v }));
     },
     totalSteps: enabledSteps.length,
   };

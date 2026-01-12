@@ -1,45 +1,87 @@
 import WizardProgress from "@/components/WizardProgress";
 import { useWizard } from "@/components/wizard-context";
 import {
-  CigaretteIcon,
   CornerLeftUp,
+  FileIcon,
   FolderIcon,
   LinkIcon,
-  Paperclip,
-  Plus,
-  PlusIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldContent,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  FieldLegend,
-  FieldSet,
-} from "@/components/ui/field";
+import { FieldDescription, FieldLegend, FieldSet } from "@/components/ui/field";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRef, useState } from "react";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Popover, PopoverContent } from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
-import { AddItemDropdown } from "@/components/AddItemDropdown";
-import { useAppForm } from "@/hooks/form";
-import * as z from "zod";
+  AddDocumentActions,
+  FileActions,
+  FolderActions,
+  LinkActions,
+} from "./DocumentsFormActions";
+import Link from "next/link";
+
+function renameDocument(
+  id: string,
+  newName: string,
+  tree: DocumentItem[],
+): DocumentItem[] {
+  return tree.map((documentItem) => {
+    if (documentItem.id === id) {
+      if (documentItem.type === "link") {
+        return { ...documentItem, name: newName, value: newName };
+      }
+
+      return {
+        ...documentItem,
+        name: newName,
+      };
+    }
+    if (documentItem.type === "folder") {
+      return {
+        ...documentItem,
+        children: renameDocument(id, newName, documentItem.children),
+      };
+    }
+    return documentItem;
+  });
+}
+
+function _deleteDocument(
+  id: string,
+  tree: DocumentItem[],
+): [boolean, DocumentItem][] {
+  return tree.map((documentItem) => {
+    if (documentItem.id === id) {
+      return [true, documentItem];
+    }
+    if (documentItem.type === "folder") {
+      return [
+        false,
+        {
+          ...documentItem,
+          children: _deleteDocument(id, documentItem.children)
+            .filter(([deleted]) => !deleted)
+            .map(([_, documentItem]) => documentItem),
+        },
+      ];
+    }
+    return [false, documentItem];
+  });
+}
+
+function deleteDocument(id: string, tree: DocumentItem[]) {
+  return _deleteDocument(id, tree)
+    .filter(([deleted]) => !deleted)
+    .map(([_, documentItem]) => documentItem);
+}
 
 function addDocument(
   name: string,
   parentId: string,
-  data: { type: "file"; value: File } | { type: "link"; value: string },
+  data:
+    | { type: "file"; value: File }
+    | { type: "link"; value: string }
+    | { type: "folder"; children: DocumentItem[] },
   tree: DocumentItem[],
 ): DocumentItem[] {
   return tree.map((documentItem) => {
@@ -50,6 +92,7 @@ function addDocument(
           children: [
             ...documentItem.children,
             {
+              // TODO: Find a better way to generate IDs
               id: crypto.randomUUID(),
               name: name,
               ...data,
@@ -59,38 +102,7 @@ function addDocument(
 
       return {
         ...documentItem,
-        children: addDocument(name, parentId, data, tree),
-      };
-    }
-
-    return documentItem;
-  });
-}
-
-function addFolder(
-  name: string,
-  parentId: string,
-  tree: DocumentItem[],
-): DocumentItem[] {
-  return tree.map((documentItem) => {
-    if (documentItem.type === "folder") {
-      if (documentItem.id === parentId)
-        return {
-          ...documentItem,
-          children: [
-            ...documentItem.children,
-            {
-              id: crypto.randomUUID(),
-              name: name,
-              type: "folder",
-              children: [],
-            },
-          ],
-        };
-
-      return {
-        ...documentItem,
-        children: addFolder(name, parentId, documentItem.children),
+        children: addDocument(name, parentId, data, documentItem.children),
       };
     }
 
@@ -114,14 +126,6 @@ function findDocument(
   return undefined;
 }
 
-const FOLDER_FORM_ID = "add-item-folder";
-const LINK_FORM_ID = "add-item-link";
-const FILE_FORM_ID = "add-file";
-
-const folderFormSchema = z.object({
-  name: z.string().nonempty({ error: "Folder name must be nonempty" }),
-});
-
 export default function DocumentsForm() {
   const { step } = useWizard();
 
@@ -134,31 +138,14 @@ export default function DocumentsForm() {
     },
   ]);
 
-  const [addDocumentMode, setAddDocumentMode] = useState<
-    "none" | "folder" | "file" | "link"
-  >("none");
-
   const [visitStack, setVisitStack] = useState<string[]>(["root"]);
   const currentFolder =
     findDocument(visitStack[visitStack.length - 1], tree[0]) || tree[0];
 
-  const folderForm = useAppForm({
-    defaultValues: {
-      name: "",
-    },
-    validators: {
-      onSubmit: folderFormSchema,
-    },
-    onSubmit: async ({ value }) => {
-      if (currentFolder)
-        setTree((current) => addFolder(value.name, currentFolder.id, current));
-    },
-  });
-
   return (
     <>
       <form className="border-b border-t" id={step.formId}>
-        <FieldSet>
+        <FieldSet className="gap-4">
           <div className="border-b px-6 py-4">
             <FieldLegend variant="label">Documents</FieldLegend>
             <FieldDescription>Add documents to your event.</FieldDescription>
@@ -168,133 +155,134 @@ export default function DocumentsForm() {
               variant="outline"
               size="icon-sm"
               disabled={currentFolder.id === "root"}
-              onClick={() =>
-                setVisitStack((current) => {
-                  current.pop();
-                  return current;
-                })
-              }
+              onClick={(e) => {
+                e.preventDefault();
+                setVisitStack((current) => current.slice(0, -1));
+              }}
             >
               <CornerLeftUp />
             </Button>
 
-            <span>{currentFolder!.name}</span>
+            <span>{currentFolder.name}</span>
 
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger asChild>
-                <Button size="icon-sm" className="ml-auto">
-                  <PlusIcon />
-                </Button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent align="end" className="w-72">
-                {addDocumentMode === "none" && (
-                  <>
-                    <DropdownMenuItem
-                      onSelect={(e) => {
-                        e.preventDefault();
-                        setAddDocumentMode("folder");
-                      }}
-                    >
-                      <FolderIcon />
-                      Folder
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={(e) => {
-                        e.preventDefault();
-                        setAddDocumentMode("link");
-                      }}
-                    >
-                      <LinkIcon />
-                      Link
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={(e) => {
-                        e.preventDefault();
-                        setAddDocumentMode("file");
-                      }}
-                    >
-                      <Paperclip />
-                      File
-                    </DropdownMenuItem>
-                  </>
-                )}
-                {addDocumentMode === "folder" && (
-                  <form
-                    className="space-y-3 px-2 py-2"
-                    id={FOLDER_FORM_ID}
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      folderForm.handleSubmit();
-                    }}
-                  >
-                    <folderForm.AppField
-                      name="name"
-                      children={(field) => (
-                        <field.TextField label="Folder Name" />
-                      )}
-                    />
-                    <Actions
-                      formId={FOLDER_FORM_ID}
-                      onCancel={() => setAddDocumentMode("none")}
-                    />
-                  </form>
-                )}
-                {addDocumentMode === "link" && (
-                  <form className="space-y-3 px-2 py-2" id={LINK_FORM_ID}>
-                    <Field>
-                      <FieldLabel>Link URL</FieldLabel>
-                      <Input placeholder="https://example.com" />
-                    </Field>
-                    <Actions
-                      formId={LINK_FORM_ID}
-                      onCancel={() => setAddDocumentMode("none")}
-                    />
-                  </form>
-                )}
-                {addDocumentMode === "file" && (
-                  <form className="space-y-3 px-2 py-2" id={FILE_FORM_ID}>
-                    <Field>
-                      <FieldLabel>Upload File</FieldLabel>
-                      <Input type="file" />
-                    </Field>
-                    <Actions
-                      formId={FILE_FORM_ID}
-                      onCancel={() => setAddDocumentMode("none")}
-                    />
-                  </form>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <AddDocumentActions
+              addFolder={(name) => {
+                setTree((current) =>
+                  addDocument(
+                    name,
+                    currentFolder.id,
+                    { type: "folder", children: [] },
+                    current,
+                  ),
+                );
+              }}
+              addLink={(url) => {
+                setTree((current) =>
+                  addDocument(
+                    url,
+                    currentFolder.id,
+                    { type: "link", value: url },
+                    current,
+                  ),
+                );
+              }}
+              addFile={(file) =>
+                setTree((current) =>
+                  addDocument(
+                    file.name,
+                    currentFolder.id,
+                    { type: "file", value: file },
+                    current,
+                  ),
+                )
+              }
+            />
           </div>
-          <ScrollArea className="h-72">
+          <ScrollArea className="h-72 border mx-6 mb-4 rounded-xl">
             {currentFolder.type === "folder" &&
             currentFolder.children.length > 0 ? (
-              <FieldSet className="px-6 pb-4 gap-2">
+              <div className="gap-0 flex flex-col">
                 {currentFolder.children
                   .filter((child) => child.type === "folder")
                   .sort((a, b) =>
                     a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
                   )
                   .map((folder) => (
-                    <Button
-                      key={folder.id}
-                      size="sm"
-                      variant="outline"
-                      className="flex flex-col items-start"
-                      onClick={() =>
-                        setVisitStack((current) => [...current, folder.id])
-                      }
-                    >
-                      <span className="flex gap-2 items-center">
-                        <FolderIcon />
+                    <ButtonGroup key={folder.id} className="w-full">
+                      <Button
+                        variant="ghost"
+                        className="flex-1 justify-start rounded-none hover:cursor-pointer font-normal"
+                        onClick={() =>
+                          setVisitStack((current) => [...current, folder.id])
+                        }
+                      >
+                        <FolderIcon size={16} />
                         {folder.name}
-                      </span>
-                    </Button>
+                      </Button>
+                      <FolderActions
+                        defaultName={folder.name}
+                        onRename={(name) => {
+                          setTree((current) =>
+                            renameDocument(folder.id, name, current),
+                          );
+                        }}
+                        onDelete={() =>
+                          setTree((current) =>
+                            deleteDocument(folder.id, current),
+                          )
+                        }
+                      />
+                    </ButtonGroup>
                   ))}
-              </FieldSet>
+                {currentFolder.children
+                  .filter((child) => child.type === "link")
+                  .sort((a, b) =>
+                    a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+                  )
+                  .map((link) => (
+                    <ButtonGroup key={link.id} className="w-full">
+                      <Link
+                        className="inline-flex items-center h-9 px-3 py-2 gap-2 text-sm flex-1 justify-start rounded-none hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 hover:cursor-pointer"
+                        href={link.value}
+                        target="_blank"
+                      >
+                        <LinkIcon size={16} />
+                        {link.name}
+                      </Link>
+                      <LinkActions
+                        defaultUrl={link.value}
+                        onRename={(url) =>
+                          setTree((current) =>
+                            renameDocument(link.id, url, current),
+                          )
+                        }
+                        onDelete={() =>
+                          setTree((current) => deleteDocument(link.id, current))
+                        }
+                      />
+                    </ButtonGroup>
+                  ))}
+                {currentFolder.children
+                  .filter((child) => child.type === "file")
+                  .sort((a, b) =>
+                    a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+                  )
+                  .map((file) => (
+                    <ButtonGroup key={file.id} className="w-full">
+                      <span className="inline-flex items-center h-9 px-3 py-2 gap-2 text-sm flex-1 justify-start rounded-none">
+                        <FileIcon size={16} />
+                        {file.name}
+                      </span>
+                      <FileActions
+                        onDelete={() =>
+                          setTree((current) => deleteDocument(file.id, current))
+                        }
+                      />
+                    </ButtonGroup>
+                  ))}
+              </div>
             ) : (
-              <div className="px-6 w-full text-muted-foreground text-sm">
+              <div className="p-4 w-full text-muted-foreground text-sm">
                 <p>Folder is empty.</p>
                 <br />
                 <p>Click the "+" to add some documents.</p>
@@ -305,24 +293,5 @@ export default function DocumentsForm() {
       </form>
       <WizardProgress />
     </>
-  );
-}
-
-function Actions({
-  onCancel,
-  formId,
-}: {
-  onCancel: () => void;
-  formId: string;
-}) {
-  return (
-    <div className="flex justify-end gap-2">
-      <Button size="sm" variant="ghost" onClick={onCancel}>
-        Back
-      </Button>
-      <Button size="sm" form={formId}>
-        Add
-      </Button>
-    </div>
   );
 }

@@ -1,5 +1,4 @@
 import { useFieldContext } from "@/hooks/formContext";
-import { GenericFieldProps } from "@/hooks/form";
 import { useStore } from "@tanstack/react-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,14 +13,14 @@ import { useRef } from "react";
 type FileUploadFieldProps = {
   label?: string | undefined;
   description?: string | undefined;
-  accept: string;
+  accept?: string;
 };
 
 // TODO: Change this to a dropzone instead of relying on default input behaviour
 export default function FileUploadField({
   label,
   description,
-  accept,
+  accept = "",
 }: FileUploadFieldProps) {
   const field = useFieldContext<File | null | undefined>();
 

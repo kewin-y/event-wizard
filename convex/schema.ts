@@ -12,12 +12,12 @@ export default defineSchema({
     slug: v.string(),
     imageStorageId: v.optional(v.id("_storage")),
     userId: v.id("users"),
-    featuresEnabled: v.object({
-      attendees: v.boolean(), // Could make individual features optional
-      questions: v.boolean(),
-      agenda: v.boolean(),
-      documents: v.boolean(),
-      zoom: v.boolean(),
+    enabledFeatures: v.object({
+      attendees: v.optional(v.boolean()),
+      questions: v.optional(v.boolean()),
+      agenda: v.optional(v.boolean()),
+      documents: v.optional(v.boolean()),
+      zoom: v.optional(v.boolean()),
     }),
   }).index("by_user", ["userId"]),
   attendees: defineTable({

@@ -25,6 +25,7 @@ export default function SetupForm() {
       onChange: SetupSchema,
     },
     onSubmit: async ({ value }) => {
+      console.log(value)
       setSetupValues(value);
       next();
     },

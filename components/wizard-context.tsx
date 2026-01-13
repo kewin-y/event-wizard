@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import {
   AgendaValues,
   AttendeesValues,
@@ -8,6 +8,9 @@ import {
   SetupValues,
   ZoomValues,
 } from "@/types/event-wizard-common";
+
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 type WizardData = {
   setup: SetupValues;
@@ -25,25 +28,21 @@ const FORM_IDS = {
   Agenda: "wizard-agenda",
   Documents: "wizard-documents",
   Zoom: "wizard-zoom",
-  Review: "wizard-review",
 } as const;
 
 type WizardContextValue = {
   step: {
-    data:
-      | Feature
-      | { readonly name: "Setup"; readonly enabled: true }
-      | { readonly name: "Review"; readonly enabled: true };
+    data: Feature | { readonly name: "Setup"; readonly enabled: true };
     idx: number;
-    formId: string;
+    formId: (typeof FORM_IDS)[FeatureName | "Setup"];
   };
 
   totalSteps: number;
+  data: WizardData;
+
   toggleFeature: (name: FeatureName) => void;
   next: () => void;
   prev: () => void;
-
-  data: WizardData;
 
   setSetupValues: (v: SetupValues) => void;
   setAttendeesValues: (v: AttendeesValues) => void;
@@ -55,65 +54,64 @@ type WizardContextValue = {
 
 const WizardContext = createContext<WizardContextValue | null>(null);
 
-export function WizardProvider({ children }: { children: React.ReactNode }) {
-  const SETUP = { name: "Setup", enabled: true } as const;
-  const REVIEW = { name: "Review", enabled: true } as const;
+// Default event values {
+const defaultSetupValues: SetupValues = {
+  name: "",
+  slug: "",
+  image: undefined,
+  features: [],
+};
 
-  const defaultSetupValues: SetupValues = {
-    name: "",
-    slug: "",
-    image: null,
-    features: [],
-  };
+const defaultAttendeesValues: AttendeesValues = {
+  attendees: [{ name: "", email: "" }],
+};
 
-  const defaultAttendeesValues: AttendeesValues = {
-    attendees: [{ name: "", email: "" }],
-  };
-
-  const defaultQuestionsValues: QuestionsValues = {
-    questions: [
-      {
-        name: "",
-        image: null,
-        options: [
-          { name: "Yes", image: null },
-          { name: "No", image: null },
-        ],
-      },
-    ],
-  };
-
-  const defaultAgendaValues: AgendaValues = {
-    agendaDates: [
-      {
-        date: new Date(),
-        items: [
-          {
-            title: "",
-            description: "",
-            startTime: "",
-            endTime: "",
-          },
-        ],
-      },
-    ],
-  };
-
-  const defaultDocumentsValues: DocumentItem[] = [
+const defaultQuestionsValues: QuestionsValues = {
+  questions: [
     {
-      id: "root",
-      name: "/",
-      type: "folder",
-      children: [],
+      name: "",
+      image: null,
+      options: [
+        { name: "Yes", image: null },
+        { name: "No", image: null },
+      ],
     },
-  ];
+  ],
+};
 
-  const defaultZoomValues: ZoomValues = {
-    meetingId: "",
-    meetingPassword: "",
-    url: "",
-  };
+const defaultAgendaValues: AgendaValues = {
+  agendaDates: [
+    {
+      date: new Date(),
+      items: [
+        {
+          title: "",
+          description: "",
+          startTime: "",
+          endTime: "",
+        },
+      ],
+    },
+  ],
+};
 
+const defaultDocumentsValues: DocumentItem[] = [
+  {
+    id: "root",
+    name: "/",
+    type: "folder",
+    children: [],
+  },
+];
+
+const defaultZoomValues: ZoomValues = {
+  meetingId: "",
+  meetingPassword: "",
+  url: "",
+};
+// }
+
+export function WizardProvider({ children }: { children: React.ReactNode }) {
   const [data, setData] = useState<WizardData>({
     setup: defaultSetupValues,
     attendees: defaultAttendeesValues,
@@ -123,6 +121,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     zoom: defaultZoomValues,
   });
 
+  const SETUP = { name: "Setup", enabled: true } as const;
   const [features, setFeatures] = useState<Feature[]>([
     { name: "Attendees", enabled: false },
     { name: "Questions", enabled: false },
@@ -131,11 +130,55 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     { name: "Zoom", enabled: false },
   ]);
 
-  const steps = [SETUP, ...features, REVIEW];
-  const enabledSteps = steps.filter((step) => step.enabled);
+  const steps = [SETUP, ...features];
 
   const [stepIdx, setStepIdx] = useState(0);
+
+  const enabledSteps = steps.filter((step) => step.enabled);
   const currentStep = enabledSteps[stepIdx];
+
+  const createEvent = useMutation(api.events.createEvent);
+  const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
+
+  const [finished, setFinished] = useState(false);
+
+  async function generateFile(file: File) {
+    const postUrl = await generateUploadUrl();
+    const result = await fetch(postUrl, {
+      method: "POST",
+      headers: { "Content-Type": file.type },
+      body: file,
+    });
+    const { storageId } = await result.json();
+    return storageId;
+  }
+
+  async function onFinish() {
+    console.log("Event creation finished. Adding to DB");
+    console.log(JSON.stringify(data, null, 2));
+
+    const imageStorageId = data.setup.image
+      ? await generateFile(data.setup.image)
+      : undefined;
+
+    await createEvent({
+      name: data.setup.name,
+      slug: data.setup.slug,
+      imageStorageId: imageStorageId,
+      enabledFeatures: Object.fromEntries(
+        features.map((feature) => [
+          feature.name.toLowerCase(),
+          feature.enabled,
+        ]),
+      ),
+    });
+
+    setFinished(false);
+  }
+
+  useEffect(() => {
+    if (finished) onFinish();
+  }, [finished, data]);
 
   const value: WizardContextValue = {
     step: {
@@ -143,6 +186,9 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
       idx: stepIdx,
       formId: FORM_IDS[currentStep.name],
     },
+    totalSteps: enabledSteps.length,
+    data: data,
+
     toggleFeature(name: FeatureName) {
       setFeatures((current) =>
         current.map((step) =>
@@ -153,6 +199,8 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     next() {
       if (stepIdx < enabledSteps.length - 1) {
         setStepIdx((s) => s + 1);
+      } else {
+        setFinished(true);
       }
     },
     prev() {
@@ -160,7 +208,6 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
         setStepIdx((s) => s - 1);
       }
     },
-    data: data,
     setSetupValues(v) {
       setData((current) => ({ ...current, setup: v }));
     },
@@ -179,7 +226,6 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     setZoomValues(v) {
       setData((current) => ({ ...current, zoom: v }));
     },
-    totalSteps: enabledSteps.length,
   };
 
   return <WizardContext value={value}>{children}</WizardContext>;

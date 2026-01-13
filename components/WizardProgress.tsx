@@ -40,7 +40,7 @@ export default function WizardProgress({
           </Button>
           {!dontUseForm && (
             <Button type="submit" form={step.formId}>
-              Next
+              {step.idx === totalSteps - 1 ? "Finish" : "Next"}
             </Button>
           )}
           {/* Why */}
@@ -52,7 +52,7 @@ export default function WizardProgress({
                 next();
               }}
             >
-              Next
+              {step.idx === totalSteps - 1 ? "Finish" : "Next"}
             </Button>
           )}
         </div>

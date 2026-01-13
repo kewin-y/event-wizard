@@ -12,6 +12,7 @@ import {
   AttendeesValues,
   Feature,
   FeatureName,
+  featureNames,
   QuestionsValues,
   SetupValues,
   ZoomValues,
@@ -30,25 +31,25 @@ type WizardData = {
 };
 
 const FORM_IDS = {
-  Setup: "wizard-setup",
-  Attendees: "wizard-attendees",
-  Questions: "wizard-questions",
-  Agenda: "wizard-agenda",
-  Documents: "wizard-documents",
-  Zoom: "wizard-zoom",
+  setup: "wizard-setup",
+  attendees: "wizard-attendees",
+  questions: "wizard-questions",
+  agenda: "wizard-agenda",
+  documents: "wizard-documents", // Don't even need this lol
+  zoom: "wizard-zoom",
 } as const;
 
 type WizardContextValue = {
   step: {
-    data: Feature | { readonly name: "Setup"; readonly enabled: true };
+    name: FeatureName | "setup";
+    formId: (typeof FORM_IDS)[FeatureName | "setup"];
     idx: number;
-    formId: (typeof FORM_IDS)[FeatureName | "Setup"];
   };
 
   totalSteps: number;
   data: WizardData;
 
-  toggleFeature: (name: FeatureName) => void;
+  setSetupFeatures: (features: FeatureName[]) => void;
   next: (partial?: Partial<WizardData>) => void;
   prev: (parital?: Partial<WizardData>) => void;
 
@@ -127,24 +128,18 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     zoom: defaultZoomValues,
   });
 
-  const SETUP = { name: "Setup", enabled: true } as const;
-  const [features, setFeatures] = useState<Feature[]>([
-    { name: "Attendees", enabled: false },
-    { name: "Questions", enabled: false },
-    { name: "Agenda", enabled: false },
-    { name: "Documents", enabled: false },
-    { name: "Zoom", enabled: false },
-  ]);
-
-  const steps = [SETUP, ...features];
-
   const [stepIdx, setStepIdx] = useState(0);
 
-  const enabledSteps = steps.filter((step) => step.enabled);
-  const currentStep = enabledSteps[stepIdx];
+  // Use filtering to retain order
+  const enabledFeatures = featureNames.filter((feature) =>
+    data.setup.features.includes(feature),
+  );
 
-  const createEvent = useMutation(api.events.createEvent);
+  const steps: ("setup" | FeatureName)[] = ["setup", ...enabledFeatures];
+  const currentStep = steps[stepIdx];
+
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
+  const createEvent = useMutation(api.events.createEvent);
 
   const dataRef = useRef(data);
 
@@ -172,60 +167,49 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
       documents: defaultDocumentsValues,
       zoom: defaultZoomValues,
     });
-    setFeatures([
-      { name: "Attendees", enabled: false },
-      { name: "Questions", enabled: false },
-      { name: "Agenda", enabled: false },
-      { name: "Documents", enabled: false },
-      { name: "Zoom", enabled: false },
-    ]);
     setStepIdx(0);
     setWizardOpen(false);
   }
 
   async function onFinished(partial?: Partial<WizardData>) {
     const finalData = { ...dataRef.current, ...partial };
+    console.log(finalData);
 
-    console.log("Event creation finished. Adding to DB");
-    console.log(JSON.stringify(finalData, null, 2));
-
-    const imageStorageId = finalData.setup.image
+    const eventImageId = finalData.setup.image
       ? await generateFile(finalData.setup.image)
       : undefined;
 
-    const newEventId = await createEvent({
-      name: finalData.setup.name,
-      slug: finalData.setup.slug,
-      imageStorageId: imageStorageId,
-      enabledFeatures: Object.fromEntries(
-        features.map((feature) => [
-          feature.name.toLowerCase(),
-          feature.enabled,
-        ]),
-      ),
-    });
+    const enabledFeatures = Object.fromEntries(
+      featureNames.map((feature) => [
+        feature,
+        finalData.setup.features.includes(feature),
+      ]),
+    ) as Record<FeatureName, boolean>;
 
     resetWizard();
   }
 
   const value: WizardContextValue = {
     step: {
-      data: currentStep,
+      name: currentStep,
       idx: stepIdx,
-      formId: FORM_IDS[currentStep.name],
+      formId: FORM_IDS[currentStep],
     },
-    totalSteps: enabledSteps.length,
+    totalSteps: steps.length,
     data: data,
 
     wizardOpen: wizardOpen,
     setWizardOpen: setWizardOpen,
 
-    toggleFeature(name: FeatureName) {
-      setFeatures((current) =>
-        current.map((step) =>
-          step.name === name ? { ...step, enabled: !step.enabled } : step,
-        ),
-      );
+    setSetupFeatures(features) {
+      setData((current) => {
+        const newData = {
+          ...current,
+          setup: { ...current.setup, features },
+        };
+        dataRef.current = newData;
+        return newData;
+      });
     },
     next(partial) {
       if (partial) {
@@ -235,7 +219,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
           return newData;
         });
 
-        if (stepIdx < enabledSteps.length - 1) {
+        if (stepIdx < steps.length - 1) {
           setStepIdx((s) => s + 1);
         } else {
           onFinished(partial);

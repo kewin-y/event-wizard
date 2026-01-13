@@ -1,3 +1,4 @@
+"use client";
 import WizardProgress from "@/components/WizardProgress";
 import { useWizard } from "@/components/wizard-context";
 import { CornerLeftUp, FileIcon, FolderIcon, LinkIcon } from "lucide-react";

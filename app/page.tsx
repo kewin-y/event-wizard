@@ -28,7 +28,7 @@ export default async function Home() {
         <SignOutButton />
       </header>
       <main className="p-12 flex flex-col gap-12">
-        <EventGrid preloadedEvents={preloadedEvents}/>
+        <EventGrid preloadedEvents={preloadedEvents} />
         <EventWizardDialog />
       </main>
     </>

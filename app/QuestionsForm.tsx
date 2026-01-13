@@ -1,3 +1,4 @@
+"use client";
 import { useWizard } from "@/components/wizard-context";
 import { useAppForm } from "@/hooks/form";
 import WizardProgress from "@/components/WizardProgress";

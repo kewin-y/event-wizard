@@ -2,6 +2,7 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useWizard } from "./wizard-context";
+import { capitalizeFirstLetter } from "@/utils";
 
 // HACK: This onPrev function feels really awkward. I don't really know how to make it better
 // It's needed because we must lift the state to the wizard context on step changes
@@ -23,7 +24,7 @@ export default function WizardProgress({
           <span>
             Step {step.idx + 1} out of {totalSteps}
           </span>
-          <span>{step.data.name}</span>
+          <span>{capitalizeFirstLetter(step.name)}</span>
         </div>
         <Progress value={((step.idx + 1) / totalSteps) * 100} />
         <div className="flex justify-between">
@@ -35,7 +36,6 @@ export default function WizardProgress({
               {step.idx === totalSteps - 1 ? "Finish" : "Next"}
             </Button>
           )}
-          {/* Why */}
           {dontUseForm && (
             <Button type="submit" onClick={onNext}>
               {step.idx === totalSteps - 1 ? "Finish" : "Next"}

@@ -40,12 +40,12 @@ function EventWizardDialogInner() {
             Fill out the following wizard to create your event.
           </DialogDescription>
         </DialogHeader>
-        {step.data.name === "Setup" && <SetupForm />}
-        {step.data.name === "Attendees" && <AttendeesForm />}
-        {step.data.name === "Questions" && <QuestionsForm />}
-        {step.data.name === "Agenda" && <AgendaForm />}
-        {step.data.name === "Documents" && <DocumentsForm />}
-        {step.data.name === "Zoom" && <ZoomForm />}
+        {step.name === "setup" && <SetupForm />}
+        {step.name === "attendees" && <AttendeesForm />}
+        {step.name === "questions" && <QuestionsForm />}
+        {step.name === "agenda" && <AgendaForm />}
+        {step.name === "documents" && <DocumentsForm />}
+        {step.name === "zoom" && <ZoomForm />}
       </DialogContent>
     </Dialog>
   );

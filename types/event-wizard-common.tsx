@@ -1,11 +1,11 @@
 import * as z from "zod";
 
 export const featureNames = [
-  "Attendees",
-  "Questions",
-  "Agenda",
-  "Documents",
-  "Zoom",
+  "attendees",
+  "questions",
+  "agenda",
+  "documents",
+  "zoom",
 ] as const;
 
 export type FeatureName = (typeof featureNames)[number];
@@ -37,15 +37,7 @@ export const SetupSchema = z.object({
     .string()
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Enter a valid URL slug."),
   image: imageSchema,
-  features: z
-    .array(z.string())
-    .refine(
-      (value) =>
-        value.every((feature) => featureNames.some((f) => f === feature)),
-      {
-        message: "Invalid feature selected.",
-      },
-    ),
+  features: z.array(z.literal(featureNames)),
 });
 
 export const AttendeesSchema = z.object({

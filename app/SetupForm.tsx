@@ -1,7 +1,11 @@
 "use client";
 
 import { useAppForm } from "@/hooks/form";
-import { featureNames, SetupSchema } from "@/types/event-wizard-common";
+import {
+  FeatureName,
+  featureNames,
+  SetupSchema,
+} from "@/types/event-wizard-common";
 import { useWizard } from "@/components/wizard-context";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -15,9 +19,10 @@ import {
 } from "@/components/ui/field";
 
 import WizardProgress from "@/components/WizardProgress";
+import { capitalizeFirstLetter } from "@/utils";
 
 export default function SetupForm() {
-  const { step, data, setSetupValues, toggleFeature, next } = useWizard();
+  const { step, data, next, setSetupFeatures } = useWizard();
 
   const form = useAppForm({
     defaultValues: data.setup,
@@ -25,7 +30,6 @@ export default function SetupForm() {
       onChange: SetupSchema,
     },
     onSubmit: async ({ value }) => {
-      console.log(value);
       next({ setup: value });
     },
   });
@@ -93,23 +97,30 @@ export default function SetupForm() {
                             aria-invalid={isInvalid}
                             checked={field.state.value.includes(name)}
                             onCheckedChange={(checked) => {
-                              toggleFeature(name);
+                              let nextFeatures: FeatureName[];
 
                               if (checked) {
                                 field.pushValue(name);
+
+                                nextFeatures = [...field.state.value, name];
                               } else {
                                 const index = field.state.value.indexOf(name);
-                                if (index > -1) {
-                                  field.removeValue(index);
-                                }
+
+                                if (index > -1) field.removeValue(index);
+
+                                nextFeatures = field.state.value.filter(
+                                  (f) => f !== name,
+                                );
                               }
+
+                              setSetupFeatures(nextFeatures);
                             }}
                           />
                           <FieldLabel
                             htmlFor={`checkbox-${name}`}
                             className="font-normal"
                           >
-                            {name}
+                            {capitalizeFirstLetter(name)}
                           </FieldLabel>
                         </Field>
                       ))}

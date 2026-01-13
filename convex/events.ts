@@ -38,12 +38,14 @@ export const createEvent = mutation({
 
     if (!userId) throw new Error("Not authenticated.");
 
-    await ctx.db.insert("events", {
+    const newEventId = await ctx.db.insert("events", {
       name: args.name,
       slug: args.slug,
       imageStorageId: args.imageStorageId,
       userId: userId,
       enabledFeatures: args.enabledFeatures,
     });
+
+    return newEventId;
   },
 });

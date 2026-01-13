@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   AgendaValues,
   AttendeesValues,
@@ -11,6 +19,7 @@ import {
 
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 type WizardData = {
   setup: SetupValues;
@@ -50,6 +59,9 @@ type WizardContextValue = {
   setAgendaValues: (v: AgendaValues) => void;
   setDocuments: (v: DocumentItem[]) => void;
   setZoomValues: (v: ZoomValues) => void;
+
+  wizardOpen: boolean;
+  setWizardOpen: Dispatch<SetStateAction<boolean>>;
 };
 
 const WizardContext = createContext<WizardContextValue | null>(null);
@@ -112,6 +124,8 @@ const defaultZoomValues: ZoomValues = {
 // }
 
 export function WizardProvider({ children }: { children: React.ReactNode }) {
+  const [wizardOpen, setWizardOpen] = useState(false);
+
   const [data, setData] = useState<WizardData>({
     setup: defaultSetupValues,
     attendees: defaultAttendeesValues,
@@ -140,7 +154,12 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
   const createEvent = useMutation(api.events.createEvent);
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
 
-  const [finished, setFinished] = useState(false);
+  const dataRef = useRef(data);
+
+  useEffect(() => {
+    dataRef.current = data;
+    console.log("DATA CHANGED");
+  }, [data]);
 
   async function generateFile(file: File) {
     const postUrl = await generateUploadUrl();
@@ -153,17 +172,39 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     return storageId;
   }
 
-  async function onFinish() {
-    console.log("Event creation finished. Adding to DB");
-    console.log(JSON.stringify(data, null, 2));
+  function resetWizard() {
+    setData({
+      setup: defaultSetupValues,
+      attendees: defaultAttendeesValues,
+      questions: defaultQuestionsValues,
+      agenda: defaultAgendaValues,
+      documents: defaultDocumentsValues,
+      zoom: defaultZoomValues,
+    });
+    setFeatures([
+      { name: "Attendees", enabled: false },
+      { name: "Questions", enabled: false },
+      { name: "Agenda", enabled: false },
+      { name: "Documents", enabled: false },
+      { name: "Zoom", enabled: false },
+    ]);
+    setStepIdx(0);
+    setWizardOpen(false);
+  }
 
-    const imageStorageId = data.setup.image
-      ? await generateFile(data.setup.image)
+  async function onFinished() {
+    const finalData = dataRef.current;
+
+    console.log("Event creation finished. Adding to DB");
+    console.log(JSON.stringify(finalData, null, 2));
+
+    const imageStorageId = finalData.setup.image
+      ? await generateFile(finalData.setup.image)
       : undefined;
 
-    await createEvent({
-      name: data.setup.name,
-      slug: data.setup.slug,
+    const newEventId = await createEvent({
+      name: finalData.setup.name,
+      slug: finalData.setup.slug,
       imageStorageId: imageStorageId,
       enabledFeatures: Object.fromEntries(
         features.map((feature) => [
@@ -173,12 +214,8 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
       ),
     });
 
-    setFinished(false);
+    resetWizard();
   }
-
-  useEffect(() => {
-    if (finished) onFinish();
-  }, [finished, data]);
 
   const value: WizardContextValue = {
     step: {
@@ -188,6 +225,9 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     },
     totalSteps: enabledSteps.length,
     data: data,
+
+    wizardOpen: wizardOpen,
+    setWizardOpen: setWizardOpen,
 
     toggleFeature(name: FeatureName) {
       setFeatures((current) =>
@@ -200,7 +240,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
       if (stepIdx < enabledSteps.length - 1) {
         setStepIdx((s) => s + 1);
       } else {
-        setFinished(true);
+        onFinished();
       }
     },
     prev() {

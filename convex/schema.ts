@@ -30,7 +30,7 @@ export default defineSchema({
     name: v.string(),
     imageStorageId: v.optional(v.id("_storage")),
   }).index("by_event", ["eventId"]),
-  questionObjects: defineTable({
+  questionOptions: defineTable({
     eventId: v.id("events"),
     questionId: v.id("questions"),
     name: v.string(),

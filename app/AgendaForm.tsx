@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/field";
 
 export default function AgendaForm() {
-  const { step, data, next, setAgendaValues } = useWizard();
+  const { step, data, prev, next } = useWizard();
 
   const form = useAppForm({
     defaultValues: data.agenda,
@@ -21,8 +21,7 @@ export default function AgendaForm() {
       onBlur: AgendaSchema,
     },
     onSubmit: async ({ value }) => {
-      setAgendaValues(value);
-      next();
+      next({ agenda: value });
     },
   });
 
@@ -184,11 +183,7 @@ export default function AgendaForm() {
           }}
         </form.AppField>
       </form>
-      <WizardProgress
-        onPrev={() => {
-          setAgendaValues(form.state.values);
-        }}
-      />
+      <WizardProgress onPrev={() => prev({ agenda: form.state.values })} />
     </>
   );
 }

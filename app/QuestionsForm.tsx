@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/field";
 
 export default function QuestionsForm() {
-  const { step, data, next, setQuestionsValues } = useWizard();
+  const { step, data, prev, next } = useWizard();
 
   const form = useAppForm({
     defaultValues: data.questions,
@@ -22,8 +22,7 @@ export default function QuestionsForm() {
       onBlur: QuestionsSchema,
     },
     onSubmit: async ({ value }) => {
-      setQuestionsValues(value);
-      next();
+      next({ questions: value });
     },
   });
 
@@ -176,7 +175,7 @@ export default function QuestionsForm() {
       </form>
       <WizardProgress
         onPrev={() => {
-          setQuestionsValues(form.state.values);
+          prev({ questions: form.state.values });
         }}
       />
     </>

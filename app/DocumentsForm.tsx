@@ -122,7 +122,7 @@ function findDocument(
 }
 
 export default function DocumentsForm() {
-  const { data, setDocuments } = useWizard();
+  const { data, prev, next } = useWizard();
 
   const [tree, setTree] = useState<DocumentItem[]>(data.documents);
 
@@ -286,8 +286,8 @@ export default function DocumentsForm() {
         </FieldSet>
       </div>
       <WizardProgress
-        onPrev={() => setDocuments(tree)}
-        onNext={() => setDocuments(tree)}
+        onPrev={() => prev({ documents: tree })}
+        onNext={() => next({ documents: tree })}
         dontUseForm
       />
     </>

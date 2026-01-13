@@ -11,14 +11,14 @@ import { useAppForm } from "@/hooks/form";
 import { ZoomSchema } from "@/types/event-wizard-common";
 
 export default function ZoomForm() {
-  const { step, data, setZoomValues } = useWizard();
+  const { step, prev, next, data } = useWizard();
   const form = useAppForm({
     defaultValues: data.zoom,
     validators: {
       onChange: ZoomSchema,
     },
     onSubmit: async ({ value }) => {
-      setZoomValues(value);
+      next({ zoom: value });
     },
   });
   return (
@@ -66,7 +66,7 @@ export default function ZoomForm() {
           />
         </FieldGroup>
       </form>
-      <WizardProgress />
+      <WizardProgress onPrev={() => prev({ zoom: form.state.values })} />
     </>
   );
 }

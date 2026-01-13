@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function AttendeesForm() {
-  const { step, data, next, setAttendeesValues } = useWizard();
+  const { step, data, prev, next } = useWizard();
 
   const form = useAppForm({
     defaultValues: data.attendees,
@@ -22,8 +22,7 @@ export default function AttendeesForm() {
       onBlur: AttendeesSchema,
     },
     onSubmit: async ({ value }) => {
-      setAttendeesValues(value);
-      next();
+      next({ attendees: value });
     },
   });
 
@@ -109,7 +108,7 @@ export default function AttendeesForm() {
       </form>
       <WizardProgress
         onPrev={() => {
-          setAttendeesValues(form.state.values);
+          prev({ attendees: form.state.values });
         }}
       />
     </>

@@ -19,7 +19,6 @@ import {
 
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
 
 type WizardData = {
   setup: SetupValues;
@@ -50,15 +49,8 @@ type WizardContextValue = {
   data: WizardData;
 
   toggleFeature: (name: FeatureName) => void;
-  next: () => void;
-  prev: () => void;
-
-  setSetupValues: (v: SetupValues) => void;
-  setAttendeesValues: (v: AttendeesValues) => void;
-  setQuestionsValues: (v: QuestionsValues) => void;
-  setAgendaValues: (v: AgendaValues) => void;
-  setDocuments: (v: DocumentItem[]) => void;
-  setZoomValues: (v: ZoomValues) => void;
+  next: (partial?: Partial<WizardData>) => void;
+  prev: (parital?: Partial<WizardData>) => void;
 
   wizardOpen: boolean;
   setWizardOpen: Dispatch<SetStateAction<boolean>>;
@@ -158,7 +150,6 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     dataRef.current = data;
-    console.log("DATA CHANGED");
   }, [data]);
 
   async function generateFile(file: File) {
@@ -192,8 +183,8 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     setWizardOpen(false);
   }
 
-  async function onFinished() {
-    const finalData = dataRef.current;
+  async function onFinished(partial?: Partial<WizardData>) {
+    const finalData = { ...dataRef.current, ...partial };
 
     console.log("Event creation finished. Adding to DB");
     console.log(JSON.stringify(finalData, null, 2));
@@ -236,35 +227,33 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
         ),
       );
     },
-    next() {
-      if (stepIdx < enabledSteps.length - 1) {
-        setStepIdx((s) => s + 1);
-      } else {
-        onFinished();
+    next(partial) {
+      if (partial) {
+        setData((current) => {
+          const newData = { ...current, ...partial };
+          dataRef.current = newData;
+          return newData;
+        });
+
+        if (stepIdx < enabledSteps.length - 1) {
+          setStepIdx((s) => s + 1);
+        } else {
+          onFinished(partial);
+        }
       }
     },
-    prev() {
+    prev(partial) {
+      if (partial) {
+        setData((current) => {
+          const newData = { ...current, ...partial };
+          dataRef.current = newData;
+          return newData;
+        });
+      }
+
       if (stepIdx > 0) {
         setStepIdx((s) => s - 1);
       }
-    },
-    setSetupValues(v) {
-      setData((current) => ({ ...current, setup: v }));
-    },
-    setAttendeesValues(v) {
-      setData((current) => ({ ...current, attendees: v }));
-    },
-    setQuestionsValues(v) {
-      setData((current) => ({ ...current, questions: v }));
-    },
-    setAgendaValues(v) {
-      setData((current) => ({ ...current, agenda: v }));
-    },
-    setDocuments(v) {
-      setData((current) => ({ ...current, documents: v }));
-    },
-    setZoomValues(v) {
-      setData((current) => ({ ...current, zoom: v }));
     },
   };
 

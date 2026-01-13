@@ -15,7 +15,7 @@ export default function WizardProgress({
   onPrev?: () => void;
   onNext?: () => void;
 }) {
-  const { step, totalSteps, prev, next } = useWizard();
+  const { step, totalSteps } = useWizard();
   return (
     <DialogFooter>
       <div className="flex flex-col gap-4 w-full">
@@ -27,15 +27,7 @@ export default function WizardProgress({
         </div>
         <Progress value={((step.idx + 1) / totalSteps) * 100} />
         <div className="flex justify-between">
-          <Button
-            variant="outline"
-            disabled={step.idx <= 0}
-            onClick={() => {
-              // Like I said, really awkward ...
-              onPrev();
-              prev();
-            }}
-          >
+          <Button variant="outline" disabled={step.idx <= 0} onClick={onPrev}>
             Previous
           </Button>
           {!dontUseForm && (
@@ -45,13 +37,7 @@ export default function WizardProgress({
           )}
           {/* Why */}
           {dontUseForm && (
-            <Button
-              type="submit"
-              onClick={() => {
-                onNext();
-                next();
-              }}
-            >
+            <Button type="submit" onClick={onNext}>
               {step.idx === totalSteps - 1 ? "Finish" : "Next"}
             </Button>
           )}

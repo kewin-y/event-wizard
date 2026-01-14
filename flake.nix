@@ -22,6 +22,7 @@
             inherit
               (pkgs)
               nodejs
+              pnpm
               prettierd
               typescript-language-server
               tailwindcss-language-server

@@ -20,6 +20,7 @@ import {
 
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { DocumentItem, TransformedDocumentItem } from "@/types/documents";
 
 type WizardData = {
   setup: SetupValues;
@@ -158,6 +159,53 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     return storageId;
   }
 
+  // Replaces every file value of questions with a convex storage Id
+  const transformQuestions = (questions: QuestionsValues["questions"]) =>
+    Promise.all(
+      questions.map(async (question) => ({
+        name: question.name,
+        imageStorageId: question.image
+          ? await generateFile(question.image)
+          : undefined,
+        options: await Promise.all(
+          question.options.map(async (option) => ({
+            name: option.name,
+            imageStorageId: option.image
+              ? await generateFile(option.image)
+              : undefined,
+          })),
+        ),
+      })),
+    );
+
+  const transformAgenda = (agenda: AgendaValues["agendaDates"]) =>
+    agenda.map((agendaDate) => ({
+      date: agendaDate.date.getTime(),
+      items: agendaDate.items,
+    }));
+
+  const transformDocuments = (
+    docs: DocumentItem[],
+  ): Promise<TransformedDocumentItem[]> =>
+    Promise.all(
+      docs.map(async (doc) => {
+        if (doc.type === "file")
+          return {
+            ...doc,
+            value: await generateFile(doc.value),
+          };
+
+        if (doc.type === "folder") {
+          return {
+            ...doc,
+            children: await transformDocuments(doc.children),
+          };
+        }
+
+        return doc;
+      }),
+    );
+
   function resetWizard() {
     setData({
       setup: defaultSetupValues,
@@ -185,6 +233,46 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
         finalData.setup.features.includes(feature),
       ]),
     ) as Record<FeatureName, boolean>;
+
+    await createEvent({
+      setup: {
+        name: finalData.setup.name,
+        slug: finalData.setup.slug,
+        imageStorageId: eventImageId,
+        enabledFeatures,
+      },
+      ...(enabledFeatures.attendees
+        ? {
+            attendees: finalData.attendees,
+          }
+        : {}),
+      ...(enabledFeatures.questions
+        ? {
+            questions: {
+              questions: await transformQuestions(
+                finalData.questions.questions,
+              ),
+            },
+          }
+        : {}),
+      ...(enabledFeatures.agenda
+        ? {
+            agenda: {
+              agendaDates: transformAgenda(finalData.agenda.agendaDates),
+            },
+          }
+        : {}),
+      ...(enabledFeatures.documents
+        ? {
+            documents: await transformDocuments(finalData.documents),
+          }
+        : {}),
+      ...(enabledFeatures.zoom
+        ? {
+            zoom: finalData.zoom,
+          }
+        : {}),
+    });
 
     resetWizard();
   }

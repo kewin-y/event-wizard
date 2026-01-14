@@ -35,7 +35,6 @@ export default defineSchema({
     questionId: v.id("questions"),
     name: v.string(),
     imageStorageId: v.optional(v.id("_storage")),
-    order: v.number(),
   }).index("by_question", ["questionId"]),
   agendaDates: defineTable({
     eventId: v.id("events"),
@@ -60,8 +59,6 @@ export default defineSchema({
 
     // Files
     storageId: v.optional(v.id("_storage")),
-    fileSize: v.optional(v.number()),
-    mimeType: v.optional(v.string()),
 
     // Links
     url: v.optional(v.string()),

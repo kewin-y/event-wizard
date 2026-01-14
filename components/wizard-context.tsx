@@ -8,11 +8,10 @@ import {
   useState,
 } from "react";
 import {
+  featureNames,
   AgendaValues,
   AttendeesValues,
-  Feature,
   FeatureName,
-  featureNames,
   QuestionsValues,
   SetupValues,
   ZoomValues,
@@ -55,7 +54,11 @@ type WizardContextValue = {
   prev: (parital?: Partial<WizardData>) => void;
 
   wizardOpen: boolean;
-  setWizardOpen: Dispatch<SetStateAction<boolean>>;
+  toggleWizard: (open: boolean) => void;
+  exitWizard: () => void;
+
+  alertOpen: boolean;
+  setAlertOpen: (open: boolean) => void;
 };
 
 const WizardContext = createContext<WizardContextValue | null>(null);
@@ -119,6 +122,7 @@ const defaultZoomValues: ZoomValues = {
 
 export function WizardProvider({ children }: { children: React.ReactNode }) {
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
 
   const [data, setData] = useState<WizardData>({
     setup: defaultSetupValues,
@@ -216,6 +220,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
       zoom: defaultZoomValues,
     });
     setStepIdx(0);
+    setAlertOpen(false);
     setWizardOpen(false);
   }
 
@@ -284,11 +289,21 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
       formId: FORM_IDS[currentStep],
     },
     totalSteps: steps.length,
-    data: data,
 
-    wizardOpen: wizardOpen,
-    setWizardOpen: setWizardOpen,
+    data,
+    alertOpen,
+    wizardOpen,
 
+    setAlertOpen,
+    exitWizard: resetWizard,
+
+    toggleWizard(open) {
+      if (open) {
+        setWizardOpen(true);
+      } else {
+        setAlertOpen(true);
+      }
+    },
     setSetupFeatures(features) {
       setData((current) => {
         const newData = {

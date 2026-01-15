@@ -2,8 +2,8 @@ import { v } from "convex/values";
 import { query, mutation, action } from "./_generated/server";
 import { api } from "./_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { TransformedDocumentItem } from "../types/documents";
 import { Id } from "./_generated/dataModel";
+import { TransformedDocumentItem } from "../types/events";
 
 export const getEvents = query({
   handler: async (ctx) => {

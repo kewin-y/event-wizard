@@ -1,12 +1,9 @@
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useWizard } from "./wizard-context";
-import { capitalizeFirstLetter } from "@/utils";
+import { capitalizeFirstLetter } from "@/lib/utils";
+import { useEventWizard } from "../_hooks/event-wizard-context";
 
-// HACK: This onPrev function feels really awkward. I don't really know how to make it better
-// It's needed because we must lift the state to the wizard context on step changes
-// This state depends on the current form (step)
 export default function WizardProgress({
   dontUseForm = false,
   onPrev = () => {},
@@ -16,7 +13,7 @@ export default function WizardProgress({
   onPrev?: () => void;
   onNext?: () => void;
 }) {
-  const { step, totalSteps } = useWizard();
+  const { step, totalSteps } = useEventWizard();
   return (
     <DialogFooter>
       <div className="flex flex-col gap-4 w-full">

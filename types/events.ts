@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { Id } from "../convex/_generated/dataModel";
 
 export const featureNames = [
   "attendees",
@@ -108,3 +109,42 @@ export type AttendeesValues = z.infer<typeof AttendeesSchema>;
 export type QuestionsValues = z.infer<typeof QuestionsSchema>;
 export type AgendaValues = z.infer<typeof AgendaSchema>;
 export type ZoomValues = z.infer<typeof ZoomSchema>;
+export type DocumentItem =
+  | {
+      id: string;
+      name: string;
+      type: "folder";
+      children: DocumentItem[];
+    }
+  | {
+      id: string;
+      name: string;
+      type: "file";
+      value: File;
+    }
+  | {
+      id: string;
+      name: string;
+      type: "link";
+      value: string;
+    };
+
+export type TransformedDocumentItem =
+  | {
+      id: string;
+      name: string;
+      type: "folder";
+      children: TransformedDocumentItem[];
+    }
+  | {
+      id: string;
+      name: string;
+      type: "file";
+      value: Id<"_storage">;
+    }
+  | {
+      id: string;
+      name: string;
+      type: "link";
+      value: string;
+    };

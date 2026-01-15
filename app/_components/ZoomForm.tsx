@@ -1,7 +1,7 @@
 "use client";
 
-import { useWizard } from "@/components/wizard-context";
-import WizardProgress from "@/components/WizardProgress";
+import { useEventWizard } from "../_hooks/event-wizard-context";
+import EventWizardProgress from "./EventWizardProgress";
 
 import {
   FieldDescription,
@@ -9,11 +9,12 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
+
 import { useAppForm } from "@/hooks/form";
-import { ZoomSchema } from "@/types/event-wizard-common";
+import { ZoomSchema } from "@/types/events";
 
 export default function ZoomForm() {
-  const { step, prev, next, data } = useWizard();
+  const { step, prev, next, data } = useEventWizard();
   const form = useAppForm({
     defaultValues: data.zoom,
     validators: {
@@ -68,7 +69,7 @@ export default function ZoomForm() {
           />
         </FieldGroup>
       </form>
-      <WizardProgress onPrev={() => prev({ zoom: form.state.values })} />
+      <EventWizardProgress onPrev={() => prev({ zoom: form.state.values })} />
     </>
   );
 }

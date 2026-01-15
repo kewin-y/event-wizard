@@ -1,11 +1,12 @@
 "use client";
 
-import { useWizard } from "@/components/wizard-context";
-import WizardProgress from "@/components/WizardProgress";
+import { useEventWizard } from "../_hooks/event-wizard-context";
+import EventWizardProgress from "./EventWizardProgress";
+
 import { useAppForm } from "@/hooks/form";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AgendaSchema } from "@/types/event-wizard-common";
+import { AgendaSchema } from "@/types/events";
 import {
   FieldDescription,
   FieldError,
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/field";
 
 export default function AgendaForm() {
-  const { step, data, prev, next } = useWizard();
+  const { step, data, prev, next } = useEventWizard();
 
   const form = useAppForm({
     defaultValues: data.agenda,
@@ -185,7 +186,7 @@ export default function AgendaForm() {
           }}
         </form.AppField>
       </form>
-      <WizardProgress onPrev={() => prev({ agenda: form.state.values })} />
+      <EventWizardProgress onPrev={() => prev({ agenda: form.state.values })} />
     </>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
-import { useWizard } from "@/components/wizard-context";
+
+import { useEventWizard } from "../_hooks/event-wizard-context";
+import EventWizardProgress from "./EventWizardProgress";
 import { useAppForm } from "@/hooks/form";
-import WizardProgress from "@/components/WizardProgress";
-import { QuestionsSchema } from "@/types/event-wizard-common";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -14,8 +14,10 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 
+import { QuestionsSchema } from "@/types/events";
+
 export default function QuestionsForm() {
-  const { step, data, prev, next } = useWizard();
+  const { step, data, prev, next } = useEventWizard();
 
   const form = useAppForm({
     defaultValues: data.questions,
@@ -174,7 +176,7 @@ export default function QuestionsForm() {
           }}
         </form.AppField>
       </form>
-      <WizardProgress
+      <EventWizardProgress
         onPrev={() => {
           prev({ questions: form.state.values });
         }}

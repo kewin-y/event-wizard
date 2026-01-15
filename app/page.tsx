@@ -1,5 +1,5 @@
-import EventGrid from "./EventGrid";
-import EventWizardDialog from "./EventWizardDialog";
+import EventGrid from "./_components/EventGrid";
+import EventWizardDialog from "./_components/EventWizardDialog";
 import SignOutButton from "@/components/SignOutButton";
 import { preloadQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
@@ -16,7 +16,7 @@ export default async function Home() {
     { token },
   );
 
-  console.log(preloadedEvents);
+  // console.log(preloadedEvents);
 
   return (
     <>

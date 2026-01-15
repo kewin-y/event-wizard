@@ -1,9 +1,9 @@
 "use client";
 
-import WizardProgress from "@/components/WizardProgress";
-import { useWizard } from "@/components/wizard-context";
-import { CornerLeftUp, FileIcon, FolderIcon, LinkIcon } from "lucide-react";
+import { useEventWizard } from "../_hooks/event-wizard-context";
+import EventWizardProgress from "./EventWizardProgress";
 
+import { CornerLeftUp, FileIcon, FolderIcon, LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FieldDescription, FieldLegend, FieldSet } from "@/components/ui/field";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -125,7 +125,7 @@ function findDocument(
 }
 
 export default function DocumentsForm() {
-  const { data, prev, next } = useWizard();
+  const { data, prev, next } = useEventWizard();
 
   const [tree, setTree] = useState<DocumentItem[]>(data.documents);
 
@@ -288,7 +288,7 @@ export default function DocumentsForm() {
           </ScrollArea>
         </FieldSet>
       </div>
-      <WizardProgress
+      <EventWizardProgress
         onPrev={() => prev({ documents: tree })}
         onNext={() => next({ documents: tree })}
         dontUseForm

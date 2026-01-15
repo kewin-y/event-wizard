@@ -1,6 +1,6 @@
 "use client";
 
-import { Preloaded, usePreloadedQuery, useQuery } from "convex/react";
+import { Preloaded, usePreloadedQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
 export default function EventGrid({

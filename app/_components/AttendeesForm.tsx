@@ -1,8 +1,10 @@
 "use client";
-import { useWizard } from "@/components/wizard-context";
-import WizardProgress from "@/components/WizardProgress";
+
+import { useEventWizard } from "../_hooks/event-wizard-context";
+import EventWizardProgress from "./EventWizardProgress";
+
 import { useAppForm } from "@/hooks/form";
-import { AttendeesSchema } from "@/types/event-wizard-common";
+import { AttendeesSchema } from "@/types/events";
 
 import {
   FieldDescription,
@@ -15,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function AttendeesForm() {
-  const { step, data, prev, next } = useWizard();
+  const { step, data, prev, next } = useEventWizard();
 
   const form = useAppForm({
     defaultValues: data.attendees,
@@ -107,7 +109,7 @@ export default function AttendeesForm() {
           }}
         </form.AppField>
       </form>
-      <WizardProgress
+      <EventWizardProgress
         onPrev={() => {
           prev({ attendees: form.state.values });
         }}

@@ -31,6 +31,7 @@ import {
   useEventWizard,
   EventWizardProvider,
 } from "../_hooks/event-wizard-context";
+import { Separator } from "@/components/ui/separator";
 
 function EventWizardDialogInner() {
   const {
@@ -57,6 +58,7 @@ function EventWizardDialogInner() {
               Fill out the following wizard to create your event.
             </DialogDescription>
           </DialogHeader>
+          <Separator />
           {step.name === "setup" && <SetupForm />}
           {step.name === "attendees" && <AttendeesForm />}
           {step.name === "questions" && <QuestionsForm />}

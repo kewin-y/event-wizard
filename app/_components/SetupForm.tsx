@@ -14,10 +14,12 @@ import {
   FieldGroup,
   FieldLabel,
   FieldLegend,
+  FieldSeparator,
   FieldSet,
 } from "@/components/ui/field";
 
 import { capitalizeFirstLetter } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 export default function SetupForm() {
   const { step, data, next, setSetupFeatures } = useEventWizard();
@@ -36,7 +38,6 @@ export default function SetupForm() {
     <>
       <form
         id={step.formId}
-        className="px-6 py-4 border-b border-t"
         onSubmit={(e) => {
           e.preventDefault();
           form.handleSubmit();
@@ -51,7 +52,7 @@ export default function SetupForm() {
                 description="The name for your event."
               />
             )}
-          />
+          />{" "}
           <form.AppField
             name="slug"
             children={(field) => (

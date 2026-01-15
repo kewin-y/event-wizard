@@ -11,13 +11,12 @@ import { Input } from "@/components/ui/input";
 type TextFieldProps = {
   label?: string | undefined;
   description?: string | undefined;
-  placeholder?: string | undefined;
-};
+} & React.InputHTMLAttributes<HTMLInputElement>;
 
 export default function TextField({
   label,
   description,
-  placeholder,
+  ...props
 }: TextFieldProps) {
   const field = useFieldContext<string>();
 
@@ -37,7 +36,7 @@ export default function TextField({
         onChange={(e) => field.handleChange(e.target.value)}
         onBlur={field.handleBlur}
         aria-invalid={isInvalid}
-        placeholder={placeholder ? placeholder : ""}
+        {...props}
       />
       {isInvalid && <FieldError errors={errors} className="min-h-4" />}
     </Field>

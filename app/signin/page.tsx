@@ -6,18 +6,10 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 
 import * as z from "zod";
-import { useForm } from "@tanstack/react-form";
 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { FieldGroup } from "@/components/ui/field";
 import {
   Card,
   CardContent,
@@ -26,6 +18,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { useAppForm } from "@/hooks/form";
 
 const formSchema = z.object({
   email: z.email({ error: "Enter a valid email address." }),
@@ -36,7 +30,7 @@ export default function SignIn() {
   const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
   const router = useRouter();
   const { signIn } = useAuthActions();
-  const form = useForm({
+  const form = useAppForm({
     defaultValues: {
       email: "",
       password: "",
@@ -65,6 +59,9 @@ export default function SignIn() {
               : "Create your account"}
           </CardDescription>
         </CardHeader>
+        <div className="px-4">
+          <Separator />
+        </div>
         <CardContent>
           <form
             id="user-info-form"
@@ -74,59 +71,30 @@ export default function SignIn() {
             }}
           >
             <FieldGroup>
-              <form.Field
+              <form.AppField
                 name="email"
-                children={(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor="email">Email</FieldLabel>
-                      <Input
-                        id="email"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  );
-                }}
+                children={(field) => <field.TextField label="Email" />}
               />
-              <form.Field
+              <form.AppField
                 name="password"
-                children={(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor="password">Password</FieldLabel>
-                      {flow === "signUp" && (
-                        <FieldDescription>
-                          Must be at least 8 characters long
-                        </FieldDescription>
-                      )}
-                      <Input
-                        id="password"
-                        type="password"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  );
-                }}
+                children={(field) => (
+                  <field.TextField
+                    label="Password"
+                    type="password"
+                    description={
+                      flow === "signUp"
+                        ? "Must be at least 8 characters long"
+                        : ""
+                    }
+                  />
+                )}
               />
             </FieldGroup>
           </form>
         </CardContent>
+        <div className="px-4">
+          <Separator />
+        </div>
         <CardFooter className="flex-col gap-2">
           <Button className="w-full" form="user-info-form">
             {flow === "signIn" ? "Sign In" : "Sign Up"}

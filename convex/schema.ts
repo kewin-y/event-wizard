@@ -39,7 +39,6 @@ export default defineSchema({
   agendaDates: defineTable({
     eventId: v.id("events"),
     date: v.number(),
-    items: v.array(v.object({})),
   }).index("by_event", ["eventId"]),
   agendaItems: defineTable({
     eventId: v.id("events"),

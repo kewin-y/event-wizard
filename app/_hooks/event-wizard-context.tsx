@@ -1,12 +1,4 @@
-import {
-  createContext,
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
   featureNames,
   AgendaValues,
@@ -15,11 +7,12 @@ import {
   QuestionsValues,
   SetupValues,
   ZoomValues,
-} from "@/types/event-wizard-common";
+  DocumentItem,
+  TransformedDocumentItem,
+} from "@/types/events";
 
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { DocumentItem, TransformedDocumentItem } from "@/types/documents";
 
 type WizardData = {
   setup: SetupValues;
@@ -39,7 +32,7 @@ const FORM_IDS = {
   zoom: "wizard-zoom",
 } as const;
 
-type WizardContextValue = {
+type EventWizardContextValue = {
   step: {
     name: FeatureName | "setup";
     formId: (typeof FORM_IDS)[FeatureName | "setup"];
@@ -61,7 +54,7 @@ type WizardContextValue = {
   setAlertOpen: (open: boolean) => void;
 };
 
-const WizardContext = createContext<WizardContextValue | null>(null);
+const EventWizardContext = createContext<EventWizardContextValue | null>(null);
 
 // Default event values {
 const defaultSetupValues: SetupValues = {
@@ -120,7 +113,11 @@ const defaultZoomValues: ZoomValues = {
 };
 // }
 
-export function WizardProvider({ children }: { children: React.ReactNode }) {
+export function EventWizardProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
 
@@ -163,7 +160,9 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     return storageId;
   }
 
-  // Replaces every file value of questions with a convex storage Id
+  /*
+   * Replaces every file value of questions with a convex storage Id
+   */
   const transformQuestions = (questions: QuestionsValues["questions"]) =>
     Promise.all(
       questions.map(async (question) => ({
@@ -182,12 +181,18 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
       })),
     );
 
+  /*
+   * Replaces every date value of agenda with a unix timestamp
+   */
   const transformAgenda = (agenda: AgendaValues["agendaDates"]) =>
     agenda.map((agendaDate) => ({
       date: agendaDate.date.getTime(),
       items: agendaDate.items,
     }));
 
+  /*
+   * Replaces every file value of docs with a convex storage Id
+   */
   const transformDocuments = (
     docs: DocumentItem[],
   ): Promise<TransformedDocumentItem[]> =>
@@ -282,7 +287,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     resetWizard();
   }
 
-  const value: WizardContextValue = {
+  const value: EventWizardContextValue = {
     step: {
       name: currentStep,
       idx: stepIdx,
@@ -344,11 +349,11 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     },
   };
 
-  return <WizardContext value={value}>{children}</WizardContext>;
+  return <EventWizardContext value={value}>{children}</EventWizardContext>;
 }
 
-export function useWizard() {
-  const ctx = useContext(WizardContext);
+export function useEventWizard() {
+  const ctx = useContext(EventWizardContext);
   if (!ctx) {
     throw new Error("useWizard must be used inside WizardProvider");
   }

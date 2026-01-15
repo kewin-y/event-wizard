@@ -1,21 +1,27 @@
 "use client";
-import { useWizard } from "@/components/wizard-context";
+
+import { useEventWizard } from "../_hooks/event-wizard-context";
+import EventWizardProgress from "./EventWizardProgress";
 import { useAppForm } from "@/hooks/form";
-import WizardProgress from "@/components/WizardProgress";
-import { QuestionsSchema } from "@/types/event-wizard-common";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import {
+  Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldGroup,
+  FieldLabel,
   FieldLegend,
+  FieldSeparator,
   FieldSet,
 } from "@/components/ui/field";
 
+import { QuestionsSchema } from "@/types/events";
+
 export default function QuestionsForm() {
-  const { step, data, prev, next } = useWizard();
+  const { step, data, prev, next } = useEventWizard();
 
   const form = useAppForm({
     defaultValues: data.questions,
@@ -31,7 +37,6 @@ export default function QuestionsForm() {
     <>
       <form
         id={step.formId}
-        className="border-t border-b"
         onSubmit={(e) => {
           e.preventDefault();
           form.handleSubmit();
@@ -43,21 +48,18 @@ export default function QuestionsForm() {
               field.state.meta.isTouched && !field.state.meta.isValid;
 
             return (
-              <FieldSet>
-                <div className="border-b px-6 py-4">
-                  <FieldLegend variant="label">Questions</FieldLegend>
+              <Field>
+                <FieldContent>
+                  <FieldLabel>Questions</FieldLabel>
                   <FieldDescription>
                     Add questions for your event.
                   </FieldDescription>
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                </div>
-                <ScrollArea className={`h-96`}>
-                  <FieldGroup>
+                </FieldContent>
+                <ScrollArea className={`h-96 border rounded-md`}>
+                  <div className="flex flex-col p-4 gap-4">
                     {field.state.value.map((_, i) => (
-                      <FieldSet
-                        key={`question-${i}`}
-                        className="border-b px-6 pb-4 last:border-b-0 last:pb-0"
-                      >
+                      <FieldSet key={`question-${i}`}>
                         <FieldLegend
                           variant="label"
                           className="flex items-center w-full"
@@ -73,7 +75,7 @@ export default function QuestionsForm() {
                             </span>
                           )}
                         </FieldLegend>
-                        <FieldGroup className="gap-2">
+                        <FieldGroup className="gap-4">
                           <form.AppField
                             name={`questions[${i}].name`}
                             children={(subField) => (
@@ -90,7 +92,7 @@ export default function QuestionsForm() {
                         <div className="flex items-center">
                           <div className="grow border-t border-border" />
                           <span className="mx-3 text-sm text-muted-foreground">
-                            Options
+                            Options for Question {i + 1}
                           </span>
                           <div className="grow border-t border-border" />
                         </div>
@@ -117,7 +119,7 @@ export default function QuestionsForm() {
                                       </span>
                                     )}
                                   </FieldLegend>
-                                  <FieldGroup className="gap-2">
+                                  <FieldGroup className="gap-4">
                                     <form.AppField
                                       name={`questions[${i}].options[${j}].name`}
                                       children={(subField_) => (
@@ -144,37 +146,38 @@ export default function QuestionsForm() {
                               >
                                 Add Option
                               </Button>
+                              {i !== field.state.value.length - 1 && (
+                                <FieldSeparator />
+                              )}
                             </FieldSet>
                           )}
                         </form.AppField>
                       </FieldSet>
                     ))}
-                  </FieldGroup>
+                  </div>
                 </ScrollArea>
-                <div className="px-6 py-4 border-t">
-                  <Button
-                    className="w-full"
-                    type="button"
-                    onClick={() =>
-                      field.pushValue({
-                        name: "",
-                        image: null,
-                        options: [
-                          { name: "Yes", image: null },
-                          { name: "No", image: null },
-                        ],
-                      })
-                    }
-                  >
-                    Add Question
-                  </Button>
-                </div>
-              </FieldSet>
+                <Button
+                  className="w-full"
+                  type="button"
+                  onClick={() =>
+                    field.pushValue({
+                      name: "",
+                      image: null,
+                      options: [
+                        { name: "Yes", image: null },
+                        { name: "No", image: null },
+                      ],
+                    })
+                  }
+                >
+                  Add Question
+                </Button>
+              </Field>
             );
           }}
         </form.AppField>
       </form>
-      <WizardProgress
+      <EventWizardProgress
         onPrev={() => {
           prev({ questions: form.state.values });
         }}

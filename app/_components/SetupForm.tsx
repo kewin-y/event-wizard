@@ -1,12 +1,11 @@
 "use client";
 
+import { useEventWizard } from "../_hooks/event-wizard-context";
+import EventWizardProgress from "./EventWizardProgress";
+
 import { useAppForm } from "@/hooks/form";
-import {
-  FeatureName,
-  featureNames,
-  SetupSchema,
-} from "@/types/event-wizard-common";
-import { useWizard } from "@/components/wizard-context";
+import { featureNames, FeatureName, SetupSchema } from "@/types/events";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
@@ -15,14 +14,15 @@ import {
   FieldGroup,
   FieldLabel,
   FieldLegend,
+  FieldSeparator,
   FieldSet,
 } from "@/components/ui/field";
 
-import WizardProgress from "@/components/WizardProgress";
-import { capitalizeFirstLetter } from "@/utils";
+import { capitalizeFirstLetter } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 export default function SetupForm() {
-  const { step, data, next, setSetupFeatures } = useWizard();
+  const { step, data, next, setSetupFeatures } = useEventWizard();
 
   const form = useAppForm({
     defaultValues: data.setup,
@@ -38,7 +38,6 @@ export default function SetupForm() {
     <>
       <form
         id={step.formId}
-        className="px-6 py-4 border-b border-t"
         onSubmit={(e) => {
           e.preventDefault();
           form.handleSubmit();
@@ -53,7 +52,7 @@ export default function SetupForm() {
                 description="The name for your event."
               />
             )}
-          />
+          />{" "}
           <form.AppField
             name="slug"
             children={(field) => (
@@ -133,7 +132,7 @@ export default function SetupForm() {
           />
         </FieldSet>
       </form>
-      <WizardProgress />
+      <EventWizardProgress />
     </>
   );
 }

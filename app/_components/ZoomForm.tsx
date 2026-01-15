@@ -1,19 +1,23 @@
 "use client";
 
-import { useWizard } from "@/components/wizard-context";
-import WizardProgress from "@/components/WizardProgress";
+import { useEventWizard } from "../_hooks/event-wizard-context";
+import EventWizardProgress from "./EventWizardProgress";
 
 import {
+  FieldContent,
   FieldDescription,
   FieldGroup,
+  FieldLabel,
   FieldLegend,
+  FieldSeparator,
   FieldSet,
 } from "@/components/ui/field";
+
 import { useAppForm } from "@/hooks/form";
-import { ZoomSchema } from "@/types/event-wizard-common";
+import { ZoomSchema } from "@/types/events";
 
 export default function ZoomForm() {
-  const { step, prev, next, data } = useWizard();
+  const { step, prev, next, data } = useEventWizard();
   const form = useAppForm({
     defaultValues: data.zoom,
     validators: {
@@ -27,18 +31,17 @@ export default function ZoomForm() {
     <>
       <form
         id={step.formId}
-        className="border-t border-b"
         onSubmit={(e) => {
           e.preventDefault();
+          form.handleSubmit();
         }}
       >
-        <div className="px-6 py-4 border-b">
-          <FieldSet>
-            <FieldLegend variant="label">Zoom</FieldLegend>
-            <FieldDescription>Integrate Zoom with your event.</FieldDescription>
-          </FieldSet>
-        </div>
-        <FieldGroup className="px-6 py-4">
+        <FieldGroup className="gap-4">
+          <FieldContent>
+            <FieldLabel>Zoom</FieldLabel>
+            <FieldDescription>Integrate Zoom with your event</FieldDescription>
+          </FieldContent>
+          <FieldSeparator />
           <form.AppField
             name="meetingId"
             children={(field) => (
@@ -68,7 +71,7 @@ export default function ZoomForm() {
           />
         </FieldGroup>
       </form>
-      <WizardProgress onPrev={() => prev({ zoom: form.state.values })} />
+      <EventWizardProgress onPrev={() => prev({ zoom: form.state.values })} />
     </>
   );
 }

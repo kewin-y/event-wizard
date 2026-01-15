@@ -1,21 +1,27 @@
 "use client";
-import { useWizard } from "@/components/wizard-context";
-import WizardProgress from "@/components/WizardProgress";
+
+import { useEventWizard } from "../_hooks/event-wizard-context";
+import EventWizardProgress from "./EventWizardProgress";
+
 import { useAppForm } from "@/hooks/form";
-import { AttendeesSchema } from "@/types/event-wizard-common";
+import { AttendeesSchema } from "@/types/events";
 
 import {
+  Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldGroup,
+  FieldLabel,
   FieldLegend,
+  FieldSeparator,
   FieldSet,
 } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function AttendeesForm() {
-  const { step, data, prev, next } = useWizard();
+  const { step, data, prev, next } = useEventWizard();
 
   const form = useAppForm({
     defaultValues: data.attendees,
@@ -31,7 +37,6 @@ export default function AttendeesForm() {
     <>
       <form
         id={step.formId}
-        className="border-t border-b"
         onSubmit={(e) => {
           e.preventDefault();
           form.handleSubmit();
@@ -42,23 +47,19 @@ export default function AttendeesForm() {
             const isInvalid =
               field.state.meta.isTouched && !field.state.meta.isValid;
             return (
-              <FieldSet>
-                <div className="px-6 py-4 border-b">
-                  <FieldSet>
-                    <FieldLegend variant="label">Attendees</FieldLegend>
-                    <FieldDescription>
-                      Add attendees to your event.
-                    </FieldDescription>
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </FieldSet>
-                </div>
-                <ScrollArea className={`h-56`}>
-                  <div className="flex flex-col gap-4 px-6 pb-4">
+              <Field>
+                <FieldContent>
+                  <FieldLabel> Attendees</FieldLabel>
+                  <FieldDescription>
+                    Add attendees to your event.
+                  </FieldDescription>
+                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                </FieldContent>
+                <ScrollArea className={`h-72 border rounded-md`}>
+                  <div className="flex flex-col p-4 gap-4">
                     {field.state.value.map((_, i) => {
                       return (
-                        <FieldSet key={`attende-${i}`}>
+                        <FieldSet key={`attendee-${i}`}>
                           <FieldLegend
                             variant="label"
                             className="flex items-center w-full"
@@ -74,7 +75,7 @@ export default function AttendeesForm() {
                               </span>
                             )}
                           </FieldLegend>
-                          <FieldGroup className="gap-2">
+                          <FieldGroup className="gap-4">
                             <form.AppField
                               name={`attendees[${i}].name`}
                               children={(subField) => (
@@ -88,26 +89,27 @@ export default function AttendeesForm() {
                               )}
                             />
                           </FieldGroup>
+                          {i !== field.state.value.length - 1 && (
+                            <FieldSeparator />
+                          )}
                         </FieldSet>
                       );
                     })}
                   </div>
                 </ScrollArea>
-                <div className="px-6 py-4 border-t">
-                  <Button
-                    type="button"
-                    onClick={() => field.pushValue({ name: "", email: "" })}
-                    className="w-full"
-                  >
-                    Add Attendee
-                  </Button>
-                </div>
-              </FieldSet>
+                <Button
+                  type="button"
+                  onClick={() => field.pushValue({ name: "", email: "" })}
+                  className="w-full"
+                >
+                  Add Attendee
+                </Button>
+              </Field>
             );
           }}
         </form.AppField>
       </form>
-      <WizardProgress
+      <EventWizardProgress
         onPrev={() => {
           prev({ attendees: form.state.values });
         }}

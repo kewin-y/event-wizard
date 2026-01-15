@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { useWizard, WizardProvider } from "@/components/wizard-context";
 import SetupForm from "./SetupForm";
 import AttendeesForm from "./AttendeesForm";
 import QuestionsForm from "./QuestionsForm";
@@ -28,6 +27,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+import {
+  useEventWizard,
+  EventWizardProvider,
+} from "../_hooks/event-wizard-context";
+import { Separator } from "@/components/ui/separator";
+
 function EventWizardDialogInner() {
   const {
     step,
@@ -36,7 +41,7 @@ function EventWizardDialogInner() {
     setAlertOpen,
     exitWizard,
     toggleWizard,
-  } = useWizard();
+  } = useEventWizard();
 
   return (
     <>
@@ -53,6 +58,7 @@ function EventWizardDialogInner() {
               Fill out the following wizard to create your event.
             </DialogDescription>
           </DialogHeader>
+          <Separator />
           {step.name === "setup" && <SetupForm />}
           {step.name === "attendees" && <AttendeesForm />}
           {step.name === "questions" && <QuestionsForm />}
@@ -84,8 +90,8 @@ function EventWizardDialogInner() {
 
 export default function EventWizardDialog() {
   return (
-    <WizardProvider>
+    <EventWizardProvider>
       <EventWizardDialogInner />
-    </WizardProvider>
+    </EventWizardProvider>
   );
 }

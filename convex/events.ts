@@ -144,9 +144,11 @@ export const createEvent = mutation({
 
     if (args.setup.enabledFeatures.questions && args.questions) {
       for (const question of args.questions.questions) {
+        const { options, ...q } = question;
+
         const questionId = await ctx.db.insert("questions", {
           eventId,
-          ...question,
+          ...q,
         });
 
         for (const questionOption of question.options) {
@@ -163,7 +165,7 @@ export const createEvent = mutation({
       for (const agendaDate of args.agenda.agendaDates) {
         const agendaDateId = await ctx.db.insert("agendaDates", {
           eventId,
-          ...agendaDate,
+          date: agendaDate.date,
         });
 
         for (const agendaItem of agendaDate.items) {

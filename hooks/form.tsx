@@ -6,11 +6,6 @@ import FileUploadField from "@/components/form/FileUploadField";
 import DateField from "@/components/form/DateField";
 import TimeField from "@/components/form/TimeField";
 
-export type GenericFieldProps = {
-  label: string;
-  description: string;
-};
-
 export const { useAppForm, withForm, withFieldGroup } = createFormHook({
   fieldComponents: {
     TextField,

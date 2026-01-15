@@ -1,6 +1,5 @@
 import { useStore } from "@tanstack/react-form";
 import { useFieldContext } from "@/hooks/formContext";
-import { GenericFieldProps } from "@/hooks/form";
 import {
   Field,
   FieldDescription,

@@ -19,7 +19,12 @@ export default defineSchema({
       documents: v.optional(v.boolean()),
       zoom: v.optional(v.boolean()),
     }),
-  }).index("by_user", ["userId"]),
+  })
+    .searchIndex("search_name", {
+      searchField: "name",
+      filterFields: ["userId"],
+    })
+    .index("by_user", ["userId"]),
   attendees: defineTable({
     eventId: v.id("events"),
     name: v.string(),

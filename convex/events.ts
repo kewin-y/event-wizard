@@ -1,24 +1,33 @@
 import { v } from "convex/values";
 import { query, mutation, action } from "./_generated/server";
-import { api } from "./_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { Id } from "./_generated/dataModel";
 import { TransformedDocumentItem } from "../types/events";
+import { paginationOptsValidator } from "convex/server";
 
 export const getEvents = query({
-  handler: async (ctx) => {
+  args: {
+    paginationOpts: paginationOptsValidator,
+    search: v.string(),
+  },
+  handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
 
     if (!userId) throw new Error("Not authenticated.");
 
-    // collect has upper limit (4000 documents)
-    // TODO: rewrite and figure out a way to paginate instead
-    const events = await ctx.db
-      .query("events")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .collect();
-
-    return events;
+    if (args.search) {
+      return await ctx.db
+        .query("events")
+        .withSearchIndex("search_name", (q) =>
+          q.search("name", args.search).eq("userId", userId),
+        )
+        .paginate(args.paginationOpts);
+    } else {
+      return await ctx.db
+        .query("events")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .paginate(args.paginationOpts);
+    }
   },
 });
 
@@ -144,7 +153,7 @@ export const createEvent = mutation({
 
     if (args.setup.enabledFeatures.questions && args.questions) {
       for (const question of args.questions.questions) {
-        const { options, ...q } = question;
+        const { options: _, ...q } = question;
 
         const questionId = await ctx.db.insert("questions", {
           eventId,

@@ -4,6 +4,7 @@ import { useConvexAuth } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 export default function SignOutButton() {
   const { isAuthenticated } = useConvexAuth();
@@ -14,7 +15,7 @@ export default function SignOutButton() {
     <>
       {isAuthenticated && (
         <Button
-          variant="outline"
+          variant="secondary"
           className="hover:cursor-pointer"
           onClick={async () => {
             await signOut();
@@ -22,6 +23,7 @@ export default function SignOutButton() {
           }}
         >
           Sign Out
+          <ArrowRight />
         </Button>
       )}
     </>

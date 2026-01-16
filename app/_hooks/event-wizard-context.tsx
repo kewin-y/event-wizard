@@ -231,7 +231,6 @@ export function EventWizardProvider({
 
   async function onFinished(partial?: Partial<WizardData>) {
     const finalData = { ...dataRef.current, ...partial };
-    console.log(finalData);
 
     const eventImageId = finalData.setup.image
       ? await generateFile(finalData.setup.image)

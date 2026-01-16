@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/field";
 
 import { capitalizeFirstLetter } from "@/lib/utils";
-import { useConvex, useQuery } from "convex/react";
+import { useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
 export default function SetupForm() {

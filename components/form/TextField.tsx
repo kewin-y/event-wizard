@@ -26,8 +26,6 @@ export default function TextField({
     (state) => state.meta.isTouched && !state.meta.isValid,
   );
 
-  console.log(errors);
-
   return (
     <Field>
       {label && <FieldLabel htmlFor={`field-${label}`}>{label}</FieldLabel>}

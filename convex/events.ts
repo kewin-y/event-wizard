@@ -15,19 +15,35 @@ export const getEvents = query({
 
     if (!userId) throw new ConvexError("Not authenticated.");
 
+    let results;
+
     if (args.search) {
-      return await ctx.db
+      results = await ctx.db
         .query("events")
         .withSearchIndex("search_name", (q) =>
           q.search("name", args.search).eq("userId", userId),
         )
         .paginate(args.paginationOpts);
     } else {
-      return await ctx.db
+      results = await ctx.db
         .query("events")
         .withIndex("by_user", (q) => q.eq("userId", userId))
+        .order("desc")
         .paginate(args.paginationOpts);
     }
+
+    const page = await Promise.all(
+      results.page.map(async (event) => ({
+        ...event,
+        ...(event.imageStorageId
+          ? {
+              imageUrl: await ctx.storage.getUrl(event.imageStorageId),
+            }
+          : {}),
+      })),
+    );
+
+    return { ...results, page };
   },
 });
 

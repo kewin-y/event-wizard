@@ -24,7 +24,6 @@ export default function SignOutButton() {
           }}
         >
           Sign Out
-          <ArrowRight />
         </Button>
       )}
     </>

@@ -5,6 +5,7 @@ import { preloadQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import SearchEvents from "./_components/SearchEvents";
+import { redirect } from "next/navigation";
 
 export default async function Home(props: {
   searchParams?: Promise<{
@@ -16,7 +17,7 @@ export default async function Home(props: {
 
   const token = await convexAuthNextjsToken();
 
-  if (!token) return null;
+  if (!token) redirect("/signin");
 
   const preloadedEvents = await preloadQuery(
     api.events.list,

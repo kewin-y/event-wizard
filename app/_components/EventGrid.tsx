@@ -1,13 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { Preloaded, usePaginatedQuery, usePreloadedQuery } from "convex/react";
+import {
+  Preloaded,
+  useConvexAuth,
+  usePaginatedQuery,
+  usePreloadedQuery,
+} from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ArrowRight, ImageOffIcon } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function EventGrid({
   preloadedEvents,
@@ -16,13 +20,13 @@ export default function EventGrid({
   preloadedEvents: Preloaded<typeof api.events.list>;
   search: string;
 }) {
-  const router = useRouter();
+  const { isAuthenticated, isLoading } = useConvexAuth();
 
   const initialEvents = usePreloadedQuery(preloadedEvents);
 
   const { results, status, loadMore } = usePaginatedQuery(
     api.events.list,
-    { search },
+    isAuthenticated ? { search } : "skip",
     { initialNumItems: 10 },
   );
 

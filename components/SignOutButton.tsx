@@ -16,10 +16,9 @@ export default function SignOutButton() {
         <Button
           variant="secondary"
           className="hover:cursor-pointer"
-          onClick={() => {
-            void signOut().then(() => {
-              router.push("/signin");
-            });
+          onClick={async () => {
+            await signOut();
+            window.location.href = "/signin";
           }}
         >
           Sign Out

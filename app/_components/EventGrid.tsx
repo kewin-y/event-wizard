@@ -60,7 +60,7 @@ export default function EventGrid({
                     {new Date(event._creationTime).toISOString().slice(0, 10)}
                   </p>
                 </div>
-                <Button className="ml-auto" size="icon-lg">
+                <Button className="ml-auto hover:cursor-pointer" size="icon-lg">
                   <ArrowRight />
                 </Button>
               </div>

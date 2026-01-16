@@ -14,15 +14,16 @@ import {
   FieldGroup,
   FieldLabel,
   FieldLegend,
-  FieldSeparator,
   FieldSet,
 } from "@/components/ui/field";
 
 import { capitalizeFirstLetter } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
+import { useConvex, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default function SetupForm() {
   const { step, data, next, setSetupFeatures } = useEventWizard();
+  const convex = useConvex();
 
   const form = useAppForm({
     defaultValues: data.setup,
@@ -52,9 +53,22 @@ export default function SetupForm() {
                 description="The name for your event."
               />
             )}
-          />{" "}
+          />
           <form.AppField
             name="slug"
+            validators={{
+              onChangeAsyncDebounceMs: 500,
+              onChangeAsync: async ({ value }) => {
+                if (!value) return;
+
+                const existing = await convex.query(api.events.getEventBySlug, {
+                  slug: value,
+                });
+
+                if (existing)
+                  return { message: "Event with same slug already exists." };
+              },
+            }}
             children={(field) => (
               <field.TextField
                 label="Slug"

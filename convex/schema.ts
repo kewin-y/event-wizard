@@ -24,7 +24,8 @@ export default defineSchema({
       searchField: "name",
       filterFields: ["userId"],
     })
-    .index("by_user", ["userId"]),
+    .index("by_user", ["userId"])
+    .index("by_slug", ["slug"]),
   attendees: defineTable({
     eventId: v.id("events"),
     name: v.string(),

@@ -5,6 +5,18 @@ import { Id } from "./_generated/dataModel";
 import { TransformedDocumentItem } from "../types/events";
 import { paginationOptsValidator } from "convex/server";
 
+export const getEventBySlug = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const event = await ctx.db
+      .query("events")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .unique();
+
+    return event;
+  },
+});
+
 export const getEvents = query({
   args: {
     paginationOpts: paginationOptsValidator,
@@ -131,6 +143,15 @@ export const createEvent = mutation({
     const userId = await getAuthUserId(ctx);
 
     if (!userId) throw new ConvexError("Not authenticated.");
+
+    const existing = await ctx.db
+      .query("events")
+      .withIndex("by_slug", (q) => q.eq("slug", args.setup.slug))
+      .unique();
+
+    if (existing) {
+      throw new Error("Event with same slug already exists");
+    }
 
     const eventId = await ctx.db.insert("events", {
       ...args.setup,

@@ -61,18 +61,21 @@ export default function SetupForm() {
               onChangeAsync: async ({ value }) => {
                 if (!value) return;
 
-                const existing = await convex.query(api.events.getEventBySlug, {
-                  slug: value,
-                });
+                const isSlugUnique = await convex.query(
+                  api.events.isSlugUnique,
+                  {
+                    slug: value,
+                  },
+                );
 
-                if (existing)
+                if (!isSlugUnique)
                   return { message: "Event with same slug already exists." };
               },
             }}
             children={(field) => (
               <field.TextField
                 label="Slug"
-                description="The slug for your event. Will be used in the URL."
+                description="The slug for your event. Will be used in the URL. Must be unique per event."
               />
             )}
           />

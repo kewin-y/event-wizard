@@ -141,7 +141,7 @@ export function EventWizardProvider({
   const currentStep = steps[stepIdx];
 
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
-  const createEvent = useMutation(api.events.createEvent);
+  const createEvent = useMutation(api.events.create);
 
   const dataRef = useRef(data);
 

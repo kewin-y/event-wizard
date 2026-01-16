@@ -6,18 +6,22 @@ import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ArrowRight, ImageOffIcon } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function EventGrid({
   preloadedEvents,
   search,
 }: {
-  preloadedEvents: Preloaded<typeof api.events.getEvents>;
+  preloadedEvents: Preloaded<typeof api.events.list>;
   search: string;
 }) {
+  const router = useRouter();
+
   const initialEvents = usePreloadedQuery(preloadedEvents);
 
   const { results, status, loadMore } = usePaginatedQuery(
-    api.events.getEvents,
+    api.events.list,
     { search },
     { initialNumItems: 10 },
   );
@@ -60,8 +64,10 @@ export default function EventGrid({
                     {new Date(event._creationTime).toISOString().slice(0, 10)}
                   </p>
                 </div>
-                <Button className="ml-auto hover:cursor-pointer" size="icon-lg">
-                  <ArrowRight />
+                <Button asChild size="icon" className="ml-auto">
+                  <Link href={`/event/${event.slug}`}>
+                    <ArrowRight />
+                  </Link>
                 </Button>
               </div>
             </div>

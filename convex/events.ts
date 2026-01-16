@@ -5,7 +5,27 @@ import { Id } from "./_generated/dataModel";
 import { TransformedDocumentItem } from "../types/events";
 import { paginationOptsValidator } from "convex/server";
 
-export const getEventBySlug = query({
+export const getBySlug = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) throw new ConvexError("Not authenticated.");
+
+    const event = await ctx.db
+      .query("events")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .unique();
+
+    if (!event) return null;
+
+    if (event.userId !== userId) throw new ConvexError("Not authorized.");
+
+    return event;
+  },
+});
+
+export const isSlugUnique = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
     const event = await ctx.db
@@ -13,11 +33,11 @@ export const getEventBySlug = query({
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
       .unique();
 
-    return event;
+    return event === null;
   },
 });
 
-export const getEvents = query({
+export const list = query({
   args: {
     paginationOpts: paginationOptsValidator,
     search: v.string(),
@@ -59,7 +79,7 @@ export const getEvents = query({
   },
 });
 
-export const createEvent = mutation({
+export const create = mutation({
   args: {
     setup: v.object({
       name: v.string(),

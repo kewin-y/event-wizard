@@ -19,7 +19,7 @@ export default async function Home(props: {
   if (!token) return null;
 
   const preloadedEvents = await preloadQuery(
-    api.events.getEvents,
+    api.events.list,
     {
       paginationOpts: { numItems: 10, cursor: null },
       search,

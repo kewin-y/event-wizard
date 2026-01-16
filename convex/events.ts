@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { query, mutation, action } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { Id } from "./_generated/dataModel";
@@ -13,7 +13,7 @@ export const getEvents = query({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
 
-    if (!userId) throw new Error("Not authenticated.");
+    if (!userId) throw new ConvexError("Not authenticated.");
 
     if (args.search) {
       return await ctx.db
@@ -114,7 +114,7 @@ export const createEvent = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
 
-    if (!userId) throw new Error("Not authenticated.");
+    if (!userId) throw new ConvexError("Not authenticated.");
 
     const eventId = await ctx.db.insert("events", {
       ...args.setup,

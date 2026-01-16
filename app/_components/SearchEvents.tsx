@@ -9,13 +9,14 @@ import {
 
 import { Search } from "lucide-react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { useDebouncedCallback } from "use-debounce";
 
 export default function SearchEvents() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
 
-  function handleSearch(term: string) {
+  const handleSearch = useDebouncedCallback((term: string) => {
     const params = new URLSearchParams(searchParams);
 
     if (term) {
@@ -25,7 +26,7 @@ export default function SearchEvents() {
     }
 
     replace(`${pathname}?${params.toString()}`);
-  }
+  }, 300);
 
   return (
     <InputGroup>

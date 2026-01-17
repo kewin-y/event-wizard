@@ -21,7 +21,14 @@ export const getBySlug = query({
 
     if (event.userId !== userId) throw new ConvexError("Not authorized.");
 
-    return event;
+    return {
+      ...event,
+      ...(event.imageStorageId
+        ? {
+            imageUrl: await ctx.storage.getUrl(event.imageStorageId),
+          }
+        : {}),
+    };
   },
 });
 

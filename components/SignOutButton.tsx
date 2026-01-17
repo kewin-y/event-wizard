@@ -2,24 +2,24 @@
 
 import { useConvexAuth } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
-export default function SignOutButton() {
+export default function SignOutButton({
+  ...props
+}: React.ComponentProps<"button">) {
   const { isAuthenticated } = useConvexAuth();
   const { signOut } = useAuthActions();
-  const router = useRouter();
 
   return (
     <>
       {isAuthenticated && (
         <Button
-          variant="secondary"
-          className="hover:cursor-pointer"
+          variant="outline"
           onClick={async () => {
             await signOut();
             window.location.href = "/signin";
           }}
+          {...props}
         >
           Sign Out
         </Button>

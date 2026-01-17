@@ -126,13 +126,13 @@ export default function AgendaForm() {
                                     <form.AppField
                                       name={`agendaDates[${i}].items[${j}].startTime`}
                                       children={(subField_) => (
-                                        <subField_.TimeField label="Start Time" />
+                                        <subField_.TimeField label="Start Time (Optional)" />
                                       )}
                                     />
                                     <form.AppField
                                       name={`agendaDates[${i}].items[${j}].endTime`}
                                       children={(subField_) => (
-                                        <subField_.TimeField label="End Time" />
+                                        <subField_.TimeField label="End Time (Optional)" />
                                       )}
                                     />
                                   </FieldGroup>

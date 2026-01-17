@@ -6,6 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import SearchEvents from "./_components/SearchEvents";
 import { redirect } from "next/navigation";
+import { Separator } from "@/components/ui/separator";
 
 export default async function Home(props: {
   searchParams?: Promise<{
@@ -30,14 +31,15 @@ export default async function Home(props: {
 
   return (
     <>
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b p-4 flex flex-row justify-between items-center shadow-sm">
-        <div className="flex items-center gap-8">
+      <header className="sticky min-h-12 top-0 z-10 bg-background/80 backdrop-blur-md border-b p-4 shadow-sm flex items-center gap-4">
+        <div className="flex items-center gap-4">
           <h1 className="font-bold whitespace-nowrap shrink-0">Event Wizard</h1>
+          <Separator orientation="vertical" className="my-2" />
           <SearchEvents />
         </div>
-        <SignOutButton />
+        <SignOutButton className="ml-auto" />
       </header>
-      <main className="p-12 flex flex-col gap-12">
+      <main className="p-8">
         <EventGrid preloadedEvents={preloadedEvents} search={search} />
         <EventWizardDialog />
       </main>

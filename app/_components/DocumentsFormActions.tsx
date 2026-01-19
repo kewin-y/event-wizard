@@ -39,15 +39,15 @@ const fileFormSchema = z.object({
 });
 
 type AddDocumentActionsProps = {
-  addFolder: (name: string) => void;
-  addLink: (url: string) => void;
-  addFile: (file: File) => void;
+  addFolderAction: (name: string) => void;
+  addLinkAction: (url: string) => void;
+  addFileAction: (file: File) => void;
 };
 
 export function AddDocumentActions({
-  addFolder,
-  addLink,
-  addFile,
+  addFolderAction: addFolder,
+  addLinkAction: addLink,
+  addFileAction: addFile,
 }: AddDocumentActionsProps) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"none" | "folder" | "file" | "link">("none");
@@ -198,12 +198,12 @@ export function AddDocumentActions({
 
 export function FolderActions({
   defaultName,
-  onRename,
-  onDelete,
+  onRenameAction: onRename,
+  onDeleteAction: onDelete,
 }: {
   defaultName: string;
-  onRename: (name: string) => void;
-  onDelete: () => void;
+  onRenameAction: (name: string) => void;
+  onDeleteAction: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"none" | "rename">("none");
@@ -279,12 +279,12 @@ export function FolderActions({
 
 export function LinkActions({
   defaultUrl,
-  onRename,
-  onDelete,
+  onRenameAction: onRename,
+  onDeleteAction: onDelete,
 }: {
   defaultUrl: string;
-  onRename: (url: string) => void;
-  onDelete: () => void;
+  onRenameAction: (url: string) => void;
+  onDeleteAction: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"none" | "rename">("none");
@@ -357,7 +357,11 @@ export function LinkActions({
   );
 }
 
-export function FileActions({ onDelete }: { onDelete: () => void }) {
+export function FileActions({
+  onDeleteAction: onDelete,
+}: {
+  onDeleteAction: () => void;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>

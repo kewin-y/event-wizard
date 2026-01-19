@@ -9,6 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import EditEventButton from "./_components/EditEventButton";
+import DeleteEventButton from "./_components/DeleteEventButton";
 
 export default async function EventPage({
   params,
@@ -31,14 +33,14 @@ export default async function EventPage({
 
     return (
       <>
-        <header className="sticky flex items-center gap-4 top-0 z-10 bg-background/80 backdrop-blur-md border-b p-4 shadow-sm">
-          <Button asChild variant="outline" className="hover:cursor-pointer">
+        <header className="sticky flex items-center gap-3 top-0 z-10 bg-background/80 backdrop-blur-md border-b p-4 shadow-sm">
+          <Button asChild variant="outline">
             <Link href="/">
               <ArrowLeft />
               Back
             </Link>
           </Button>
-          <Separator orientation="vertical" className="my-2"/>
+          <Separator orientation="vertical" className="my-2" />
           <h1 className="whitespace-nowrap shrink-0 muted-foreground">
             {event?.name}
           </h1>

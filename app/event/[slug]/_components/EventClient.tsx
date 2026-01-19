@@ -1,10 +1,14 @@
 "use client";
 
-import Image from "next/image";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { api } from "@/convex/_generated/api";
 import { Preloaded, usePreloadedQuery } from "convex/react";
-import { ImageOffIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
+import EventDetails from "./EventDetails";
+import { capitalizeFirstLetter } from "@/lib/utils";
+import EditEventButton from "./EditEventButton";
+import DeleteEventButton from "./DeleteEventButton";
+import { ButtonGroup } from "@/components/ui/button-group";
 
 export default function EventClient({
   preloadedEvent,
@@ -13,37 +17,32 @@ export default function EventClient({
 }) {
   const event = usePreloadedQuery(preloadedEvent);
 
-  // TODO: this is copy-pasted from EventGrid.tsx. Maybe split into reusable component?
+  const [activeTab, setActiveTab] = useState("details");
+
   return event ? (
-    <div className="w-5/12 mx-auto flex flex-col gap-6">
-      <AspectRatio
-        ratio={16 / 9}
-        className="bg-accent rounded-lg overflow-hidden"
-      >
-        {event.imageUrl ? (
-          <Image
-            src={event.imageUrl}
-            alt={`Image for event ${event.name}`}
-            fill
-          />
-        ) : (
-          <div className="size-full flex">
-            <div className="m-auto flex flex-col items-center gap-2 text-muted-foreground">
-              <ImageOffIcon size={32} />
-              <p>No image</p>
-            </div>
-          </div>
-        )}
-      </AspectRatio>
-      <div className="flex items-center gap-4">
-        <div>
-          <h4 className="font-bold">{event.name}</h4>
-          <p className="text-muted-foreground">
-            Event created on{" "}
-            {new Date(event._creationTime).toISOString().slice(0, 10)}
-          </p>
+    <div className="w-7/12 mx-auto flex flex-col gap-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
+        <div className="w-full flex items-center gap-2">
+          <TabsList>
+            <TabsTrigger value="details">Details</TabsTrigger>
+            {Object.entries(event.enabledFeatures)
+              .filter(([_, enabled]) => enabled)
+              .map(([feature]) => (
+                <TabsTrigger value={feature} key={`tab-${feature}`}>
+                  {capitalizeFirstLetter(feature)}
+                </TabsTrigger>
+              ))}
+          </TabsList>
+          <EditEventButton className="ml-auto" />
+          <DeleteEventButton />
         </div>
-      </div>
+        <TabsContent value="details">
+          <EventDetails event={event} />
+        </TabsContent>
+        {event.enabledFeatures.attendees && (
+          <TabsContent value="attendees">hey</TabsContent>
+        )}
+      </Tabs>
     </div>
   ) : null;
 }

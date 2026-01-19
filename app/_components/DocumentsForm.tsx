@@ -165,7 +165,7 @@ export default function DocumentsForm() {
           <span>{currentFolder.name}</span>
 
           <AddDocumentActions
-            addFolder={(name) => {
+            addFolderAction={(name) => {
               setTree((current) =>
                 addDocument(
                   name,
@@ -175,7 +175,7 @@ export default function DocumentsForm() {
                 ),
               );
             }}
-            addLink={(url) => {
+            addLinkAction={(url) => {
               setTree((current) =>
                 addDocument(
                   url,
@@ -185,7 +185,7 @@ export default function DocumentsForm() {
                 ),
               );
             }}
-            addFile={(file) =>
+            addFileAction={(file) =>
               setTree((current) =>
                 addDocument(
                   file.name,
@@ -222,12 +222,12 @@ export default function DocumentsForm() {
                     </Button>
                     <FolderActions
                       defaultName={folder.name}
-                      onRename={(name) => {
+                      onRenameAction={(name) => {
                         setTree((current) =>
                           renameDocument(folder.id, name, current),
                         );
                       }}
-                      onDelete={() =>
+                      onDeleteAction={() =>
                         setTree((current) => deleteDocument(folder.id, current))
                       }
                     />
@@ -252,12 +252,12 @@ export default function DocumentsForm() {
                     </Link>
                     <LinkActions
                       defaultUrl={link.value}
-                      onRename={(url) =>
+                      onRenameAction={(url) =>
                         setTree((current) =>
                           renameDocument(link.id, url, current),
                         )
                       }
-                      onDelete={() =>
+                      onDeleteAction={() =>
                         setTree((current) => deleteDocument(link.id, current))
                       }
                     />
@@ -277,7 +277,7 @@ export default function DocumentsForm() {
                       </span>
                     </div>
                     <FileActions
-                      onDelete={() =>
+                      onDeleteAction={() =>
                         setTree((current) => deleteDocument(file.id, current))
                       }
                     />

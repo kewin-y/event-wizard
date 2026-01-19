@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import {
   Preloaded,
   useConvexAuth,
@@ -9,9 +8,9 @@ import {
 } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { ArrowRight, ImageOffIcon } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import EventImage from "@/components/EventImage";
 
 export default function EventGrid({
   preloadedEvents,
@@ -32,6 +31,9 @@ export default function EventGrid({
 
   const events = status === "LoadingFirstPage" ? initialEvents.page : results;
 
+  if (!isAuthenticated) return <div>NOT AUTHENTICATED</div>;
+  if (isLoading) return <div>LOADING</div>;
+
   return (
     <>
       <div className="grid grid-cols-3 gap-8">
@@ -41,25 +43,7 @@ export default function EventGrid({
               key={event._id}
               className="rounded-xl p-6 flex flex-col gap-4 border"
             >
-              <AspectRatio
-                ratio={16 / 9}
-                className="bg-accent rounded-lg overflow-hidden"
-              >
-                {event.imageUrl ? (
-                  <Image
-                    src={event.imageUrl}
-                    alt={`Image for event ${event.name}`}
-                    fill
-                  />
-                ) : (
-                  <div className="size-full flex">
-                    <div className="m-auto flex flex-col items-center gap-2 text-muted-foreground">
-                      <ImageOffIcon size={32} />
-                      <p>No image</p>
-                    </div>
-                  </div>
-                )}
-              </AspectRatio>
+              <EventImage name={event.name} imageUrl={event.imageUrl} />
               <div className="flex items-center gap-4">
                 <div>
                   <h4 className="font-bold">{event.name}</h4>

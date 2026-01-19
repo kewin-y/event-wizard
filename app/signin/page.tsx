@@ -107,7 +107,7 @@ export default function SignIn() {
             </CardDescription>
             <Button
               variant="link"
-              className="p-0 hover:cursor-pointer"
+              className="p-0"
               onClick={() => {
                 if (flow === "signIn") setFlow("signUp");
                 else setFlow("signIn");

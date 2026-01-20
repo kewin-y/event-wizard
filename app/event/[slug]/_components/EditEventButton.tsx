@@ -8,25 +8,57 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { capitalizeFirstLetter } from "@/lib/utils";
-import { featureNames } from "@/types/events";
 import { EditIcon } from "lucide-react";
+import { EventType } from "../_types";
+import { Dialog } from "@/components/ui/dialog";
+import { useState } from "react";
+import EditDetails from "./form/EditDetails";
 
-export default function EditEventButton({ className }: { className?: string }) {
+export default function EditEventButton({
+  event,
+  className,
+}: {
+  event: EventType;
+  className?: string;
+}) {
+  const [editDetailsOpen, setEditDetailsOpen] = useState(false);
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button className={className} variant="outline">
-          <EditIcon />
-          Edit Event
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        {["details", ...featureNames].map((name) => (
-          <DropdownMenuItem key={`edit-event-${name}`}>
-            {capitalizeFirstLetter(name)}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button className={className} variant="outline">
+            <EditIcon />
+            Edit Event
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          {[
+            "details",
+            ...Object.entries(event.details.enabledFeatures).flatMap(
+              ([feature, enabled]) => (enabled ? [feature] : []),
+            ),
+          ].map((name) => (
+            <DropdownMenuItem
+              key={`edit-event-${name}`}
+              onSelect={() => {
+                switch (name) {
+                  case "details":
+                    setEditDetailsOpen(true);
+                    return;
+                  default:
+                    return;
+                }
+              }}
+            >
+              {capitalizeFirstLetter(name)}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+        <Dialog open={editDetailsOpen} onOpenChange={setEditDetailsOpen}>
+          <EditDetails />
+        </Dialog>
+      </DropdownMenu>
+    </>
   );
 }

@@ -1,18 +1,21 @@
 import Image from "next/image";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ImageOffIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function EventImage({
   name,
   imageUrl,
+  className,
 }: {
   name: string;
   imageUrl: string | null | undefined;
+  className?: string;
 }) {
   return (
     <AspectRatio
       ratio={16 / 9}
-      className="bg-accent rounded-lg overflow-hidden"
+      className={cn(className, "bg-accent rounded-t overflow-hidden")}
     >
       {imageUrl ? (
         <Image src={imageUrl} alt={`Image for event: ${name}`} fill />

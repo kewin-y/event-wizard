@@ -40,9 +40,8 @@ export default async function EventPage({
               Back
             </Link>
           </Button>
-          <Separator orientation="vertical" className="my-2" />
-          <h1 className="whitespace-nowrap shrink-0 muted-foreground">
-            {event?.name}
+          <h1 className="whitespace-nowrap shrink-0 muted-foreground ml-auto font-bold">
+            {event?.details.name}
           </h1>
           <SignOutButton className="ml-auto" />
         </header>

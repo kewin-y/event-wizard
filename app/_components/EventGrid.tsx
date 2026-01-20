@@ -1,4 +1,12 @@
 "use client";
+import {
+  Card,
+  CardAction,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 import {
   Preloaded,
@@ -31,34 +39,29 @@ export default function EventGrid({
 
   const events = status === "LoadingFirstPage" ? initialEvents.page : results;
 
-  if (!isAuthenticated) return <div>NOT AUTHENTICATED</div>;
-  if (isLoading) return <div>LOADING</div>;
-
   return (
     <>
       <div className="grid grid-cols-3 gap-8">
         {events.map((event) => {
           return (
-            <div
-              key={event._id}
-              className="rounded-xl p-6 flex flex-col gap-4 border"
+            <Card
+              className="relative mx-auto w-full pt-0"
+              key={`event-${event._id}`}
             >
               <EventImage name={event.name} imageUrl={event.imageUrl} />
-              <div className="flex items-center gap-4">
-                <div>
-                  <h4 className="font-bold">{event.name}</h4>
-                  <p className="text-muted-foreground">
-                    Event created on{" "}
-                    {new Date(event._creationTime).toISOString().slice(0, 10)}
-                  </p>
-                </div>
-                <Button asChild size="icon" className="ml-auto">
-                  <Link href={`/event/${event.slug}`}>
-                    <ArrowRight />
-                  </Link>
+              <CardHeader>
+                <CardTitle>{event.name}</CardTitle>
+                <CardDescription>
+                  Event created on{" "}
+                  {new Date(event._creationTime).toISOString().slice(0, 10)}
+                </CardDescription>
+              </CardHeader>
+              <CardFooter>
+                <Button asChild className="w-full">
+                  <Link href={`event/${event.slug}`}>View Event</Link>
                 </Button>
-              </div>
-            </div>
+              </CardFooter>
+            </Card>
           );
         })}
       </div>

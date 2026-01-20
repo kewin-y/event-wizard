@@ -32,16 +32,15 @@ export default async function Home(props: {
   return (
     <>
       <header className="sticky min-h-12 top-0 z-10 bg-background/80 backdrop-blur-md border-b p-4 shadow-sm flex items-center gap-4">
-        <div className="flex items-center gap-4">
-          <h1 className="font-bold whitespace-nowrap shrink-0">Event Wizard</h1>
-          <Separator orientation="vertical" className="my-2" />
+        <h1 className="font-bold whitespace-nowrap shrink-0">Event Wizard</h1>
+        <div className="ml-auto">
           <SearchEvents />
         </div>
+        <EventWizardDialog />
         <SignOutButton className="ml-auto" />
       </header>
       <main className="p-8">
         <EventGrid preloadedEvents={preloadedEvents} search={search} />
-        <EventWizardDialog />
       </main>
     </>
   );

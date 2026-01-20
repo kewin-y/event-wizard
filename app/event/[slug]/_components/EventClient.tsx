@@ -8,7 +8,7 @@ import EventDetails from "./EventDetails";
 import { capitalizeFirstLetter } from "@/lib/utils";
 import EditEventButton from "./EditEventButton";
 import DeleteEventButton from "./DeleteEventButton";
-import { ButtonGroup } from "@/components/ui/button-group";
+import { featureNames } from "@/types/events";
 
 export default function EventClient({
   preloadedEvent,
@@ -20,26 +20,26 @@ export default function EventClient({
   const [activeTab, setActiveTab] = useState("details");
 
   return event ? (
-    <div className="w-7/12 mx-auto flex flex-col gap-4">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
+    <div className="w-7/12 mx-auto">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="w-full flex items-center gap-2">
           <TabsList>
             <TabsTrigger value="details">Details</TabsTrigger>
-            {Object.entries(event.enabledFeatures)
-              .filter(([_, enabled]) => enabled)
-              .map(([feature]) => (
+            {featureNames.map((feature) =>
+              event.details.enabledFeatures[feature] ? (
                 <TabsTrigger value={feature} key={`tab-${feature}`}>
                   {capitalizeFirstLetter(feature)}
                 </TabsTrigger>
-              ))}
+              ) : null,
+            )}
           </TabsList>
-          <EditEventButton className="ml-auto" />
+          <EditEventButton event={event} className="ml-auto" />
           <DeleteEventButton />
         </div>
         <TabsContent value="details">
-          <EventDetails event={event} />
+          <EventDetails details={event.details} />
         </TabsContent>
-        {event.enabledFeatures.attendees && (
+        {event.details.enabledFeatures.attendees && (
           <TabsContent value="attendees">hey</TabsContent>
         )}
       </Tabs>

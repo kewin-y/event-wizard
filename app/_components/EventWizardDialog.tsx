@@ -47,8 +47,9 @@ function EventWizardDialogInner() {
     <>
       <Dialog open={wizardOpen} onOpenChange={toggleWizard}>
         <DialogTrigger asChild>
-          <Button className="fixed bottom-12 right-12 w-12 h-12 hover:cursor-pointer">
+          <Button>
             <Plus />
+            Create Event
           </Button>
         </DialogTrigger>
         <DialogContent>

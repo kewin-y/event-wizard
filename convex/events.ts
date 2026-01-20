@@ -22,12 +22,14 @@ export const getBySlug = query({
     if (event.userId !== userId) throw new ConvexError("Not authorized.");
 
     return {
-      ...event,
-      ...(event.imageStorageId
-        ? {
-            imageUrl: await ctx.storage.getUrl(event.imageStorageId),
-          }
-        : {}),
+      details: {
+        ...event,
+        ...(event.imageStorageId
+          ? {
+              imageUrl: await ctx.storage.getUrl(event.imageStorageId),
+            }
+          : {}),
+      },
     };
   },
 });

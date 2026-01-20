@@ -31,7 +31,7 @@ export default async function EventPage({
     );
     const event = await fetchQuery(api.events.getBySlug, { slug }, { token });
 
-    return (
+    return event ? (
       <>
         <header className="sticky flex items-center gap-3 top-0 z-10 bg-background/80 backdrop-blur-md border-b p-4 shadow-sm">
           <Button asChild variant="outline">
@@ -41,7 +41,7 @@ export default async function EventPage({
             </Link>
           </Button>
           <h1 className="whitespace-nowrap shrink-0 muted-foreground ml-auto font-bold">
-            {event?.details.name}
+            {event.details.name}
           </h1>
           <SignOutButton className="ml-auto" />
         </header>
@@ -49,7 +49,7 @@ export default async function EventPage({
           <EventClient preloadedEvent={preloadedEvent} />
         </main>
       </>
-    );
+    ) : null;
   } catch (e) {
     if (e instanceof ConvexError) {
       return <div>{e.message}</div>;

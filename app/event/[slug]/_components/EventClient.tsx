@@ -34,7 +34,7 @@ export default function EventClient({
             )}
           </TabsList>
           <EditEventButton event={event} className="ml-auto" />
-          <DeleteEventButton />
+          <DeleteEventButton eventId={event.details._id}/>
         </div>
         <TabsContent value="details">
           <EventDetails details={event.details} />

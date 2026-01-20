@@ -45,7 +45,7 @@ export default function EventGrid({
         {events.map((event) => {
           return (
             <Card
-              className="relative mx-auto w-full pt-0"
+              className="relative mx-auto w-full pt-0 overflow-hidden"
               key={`event-${event._id}`}
             >
               <EventImage name={event.name} imageUrl={event.imageUrl} />

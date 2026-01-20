@@ -70,7 +70,8 @@ export default defineSchema({
   }).index("by_event_and_parent", ["eventId", "parentId"]),
   zoomMeetings: defineTable({
     eventId: v.id("events"),
-    password: v.optional(v.string()),
+    meetingId: v.string(),
+    meetingPassword: v.optional(v.string()),
     url: v.string(),
   }).index("by_event", ["eventId"]),
 });

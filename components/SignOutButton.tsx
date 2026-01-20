@@ -19,7 +19,7 @@ export default function SignOutButton({ className }: { className?: string }) {
           className={className}
           onClick={() => {
             void signOut().then(() => {
-              router.push("/signin");
+              router.replace("/signin");
             });
           }}
         >

@@ -10,9 +10,7 @@ import {
   FieldContent,
   FieldDescription,
   FieldLabel,
-  FieldLegend,
   FieldSeparator,
-  FieldSet,
 } from "@/components/ui/field";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
@@ -133,7 +131,7 @@ function findDocument(
 }
 
 export default function DocumentsForm() {
-  const { data, prev, next } = useEventWizard();
+  const { step, data, prev, next } = useEventWizard();
 
   const [tree, setTree] = useState<DocumentItem[]>(data.documents);
 
@@ -149,7 +147,7 @@ export default function DocumentsForm() {
           <FieldDescription>Add documents to your event.</FieldDescription>
         </FieldContent>
         <FieldSeparator />
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-3 items-center" id={step.formId}>
           <Button
             variant="outline"
             size="icon-sm"

@@ -88,7 +88,7 @@ export const list = query({
 
 export const create = mutation({
   args: {
-    setup: v.object({
+    details: v.object({
       name: v.string(),
       slug: v.string(),
       imageStorageId: v.optional(v.id("_storage")),
@@ -173,7 +173,7 @@ export const create = mutation({
 
     const existing = await ctx.db
       .query("events")
-      .withIndex("by_slug", (q) => q.eq("slug", args.setup.slug))
+      .withIndex("by_slug", (q) => q.eq("slug", args.details.slug))
       .unique();
 
     if (existing) {
@@ -181,7 +181,7 @@ export const create = mutation({
     }
 
     const eventId = await ctx.db.insert("events", {
-      ...args.setup,
+      ...args.details,
       userId: userId,
     });
 
@@ -206,7 +206,7 @@ export const create = mutation({
         }),
       );
 
-    if (args.setup.enabledFeatures.attendees && args.attendees) {
+    if (args.details.enabledFeatures.attendees && args.attendees) {
       for (const attendee of args.attendees.attendees) {
         await ctx.db.insert("attendees", {
           ...attendee,
@@ -215,7 +215,7 @@ export const create = mutation({
       }
     }
 
-    if (args.setup.enabledFeatures.questions && args.questions) {
+    if (args.details.enabledFeatures.questions && args.questions) {
       for (const question of args.questions.questions) {
         const { options: _, ...q } = question;
 
@@ -234,7 +234,7 @@ export const create = mutation({
       }
     }
 
-    if (args.setup.enabledFeatures.agenda && args.agenda) {
+    if (args.details.enabledFeatures.agenda && args.agenda) {
       for (const agendaDate of args.agenda.agendaDates) {
         const agendaDateId = await ctx.db.insert("agendaDates", {
           eventId,
@@ -251,14 +251,14 @@ export const create = mutation({
       }
     }
 
-    if (args.setup.enabledFeatures.documents && args.documents) {
+    if (args.details.enabledFeatures.documents && args.documents) {
       await insertDocuments(
         undefined,
         args.documents as TransformedDocumentItem[],
       );
     }
 
-    if (args.setup.enabledFeatures.zoom && args.zoom) {
+    if (args.details.enabledFeatures.zoom && args.zoom) {
       await ctx.db.insert("zoomMeetings", {
         ...args.zoom,
         eventId,

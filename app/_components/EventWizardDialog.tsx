@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import SetupForm from "./SetupForm";
+import DetailsForm from "./DetailsForm";
 import AttendeesForm from "./AttendeesForm";
 import QuestionsForm from "./QuestionsForm";
 import AgendaForm from "./AgendaForm";
@@ -59,7 +59,7 @@ function EventWizardDialogInner() {
             </DialogDescription>
           </DialogHeader>
           <Separator />
-          {step.name === "setup" && <SetupForm />}
+          {step.name === "details" && <DetailsForm />}
           {step.name === "attendees" && <AttendeesForm />}
           {step.name === "questions" && <QuestionsForm />}
           {step.name === "agenda" && <AgendaForm />}

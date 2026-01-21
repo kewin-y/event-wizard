@@ -176,6 +176,23 @@ export const getBySlug = query({
       }),
     );
 
+    const agenda = await ctx.db
+      .query("agendaDates")
+      .withIndex("by_event", (q) => q.eq("eventId", event._id))
+      .collect();
+
+    const transformedAgenda = await Promise.all(
+      agenda.map(async (agendaDate) => ({
+        ...agendaDate,
+        items: await ctx.db
+          .query("agendaItems")
+          .withIndex("by_agendaDate", (q) =>
+            q.eq("agendaDateId", agendaDate._id),
+          )
+          .collect(),
+      })),
+    );
+
     return {
       details: {
         ...event,
@@ -185,6 +202,7 @@ export const getBySlug = query({
       },
       attendees: attendees,
       questions: transformedQuestions,
+      agenda: transformedAgenda,
     };
   },
 });

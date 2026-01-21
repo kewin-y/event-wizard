@@ -11,6 +11,7 @@ import DeleteEventButton from "./DeleteEventButton";
 import { featureNames } from "@/types/events";
 import EventAttendees from "./EventAttendees";
 import EventQuestions from "./EventQuestions";
+import EventAgenda from "./EventAgenda";
 
 export default function EventClient({
   preloadedEvent,
@@ -49,6 +50,11 @@ export default function EventClient({
         {event.details.enabledFeatures.questions && (
           <TabsContent value="questions">
             <EventQuestions questions={event.questions}/>
+          </TabsContent>
+        )}
+        {event.details.enabledFeatures.agenda && (
+          <TabsContent value="agenda">
+            <EventAgenda agenda={event.agenda}/>
           </TabsContent>
         )}
       </Tabs>

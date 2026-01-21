@@ -145,16 +145,46 @@ export const getBySlug = query({
       .withIndex("by_event", (q) => q.eq("eventId", event._id))
       .collect();
 
+    const questions = await ctx.db
+      .query("questions")
+      .withIndex("by_event", (q) => q.eq("eventId", event._id))
+      .collect();
+
+    const transformedQuestions = await Promise.all(
+      questions.map(async (question) => {
+        const options = await ctx.db
+          .query("questionOptions")
+          .withIndex("by_question", (q) => q.eq("questionId", question._id))
+          .collect();
+
+        const transformedOptions = await Promise.all(
+          options.map(async (option) => ({
+            ...option,
+            imageUrl: option.imageStorageId
+              ? await ctx.storage.getUrl(option.imageStorageId)
+              : undefined,
+          })),
+        );
+
+        return {
+          ...question,
+          imageUrl: question.imageStorageId
+            ? await ctx.storage.getUrl(question.imageStorageId)
+            : undefined,
+          options: transformedOptions,
+        };
+      }),
+    );
+
     return {
       details: {
         ...event,
-        ...(event.imageStorageId
-          ? {
-              imageUrl: await ctx.storage.getUrl(event.imageStorageId),
-            }
-          : {}),
+        imageUrl: event.imageStorageId
+          ? await ctx.storage.getUrl(event.imageStorageId)
+          : undefined,
       },
       attendees: attendees,
+      questions: transformedQuestions,
     };
   },
 });
@@ -201,11 +231,9 @@ export const list = query({
     const page = await Promise.all(
       results.page.map(async (event) => ({
         ...event,
-        ...(event.imageStorageId
-          ? {
-              imageUrl: await ctx.storage.getUrl(event.imageStorageId),
-            }
-          : {}),
+        imageUrl: event.imageStorageId
+          ? await ctx.storage.getUrl(event.imageStorageId)
+          : undefined,
       })),
     );
 

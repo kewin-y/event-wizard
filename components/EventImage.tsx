@@ -18,7 +18,12 @@ export default function EventImage({
       className={cn(className, "bg-accent rounded-t overflow-hidden")}
     >
       {imageUrl ? (
-        <Image src={imageUrl} alt={`Image for event: ${name}`} fill />
+        <Image
+          src={imageUrl}
+          alt={`Image for event: ${name}`}
+          fill
+          className="object-contain transition-opacity"
+        />
       ) : (
         <div className="size-full flex">
           <div className="m-auto flex flex-col items-center gap-2 text-muted-foreground">

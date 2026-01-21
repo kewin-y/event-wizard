@@ -10,6 +10,7 @@ import EditEventButton from "./EditEventButton";
 import DeleteEventButton from "./DeleteEventButton";
 import { featureNames } from "@/types/events";
 import EventAttendees from "./EventAttendees";
+import EventQuestions from "./EventQuestions";
 
 export default function EventClient({
   preloadedEvent,
@@ -43,6 +44,11 @@ export default function EventClient({
         {event.details.enabledFeatures.attendees && (
           <TabsContent value="attendees">
             <EventAttendees attendees={event.attendees} />
+          </TabsContent>
+        )}
+        {event.details.enabledFeatures.questions && (
+          <TabsContent value="questions">
+            <EventQuestions questions={event.questions}/>
           </TabsContent>
         )}
       </Tabs>

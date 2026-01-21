@@ -51,7 +51,7 @@ export default function SignIn() {
   return (
     <div className="flex flex-col h-screen mx-auto justify-center items-center">
       <Card className="w-full max-w-sm">
-        <CardHeader>
+        <CardHeader className="border-b">
           <CardTitle>{flow === "signIn" ? "Sign In" : "Sign Up"}</CardTitle>
           <CardDescription>
             {flow === "signIn"
@@ -59,9 +59,6 @@ export default function SignIn() {
               : "Create your account"}
           </CardDescription>
         </CardHeader>
-        <div className="px-4">
-          <Separator />
-        </div>
         <CardContent>
           <form
             id="user-info-form"
@@ -92,10 +89,7 @@ export default function SignIn() {
             </FieldGroup>
           </form>
         </CardContent>
-        <div className="px-4">
-          <Separator />
-        </div>
-        <CardFooter className="flex-col gap-2">
+        <CardFooter className="flex-col gap-2 border-t">
           <Button className="w-full" form="user-info-form">
             {flow === "signIn" ? "Sign In" : "Sign Up"}
           </Button>

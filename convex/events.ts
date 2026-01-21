@@ -139,6 +139,12 @@ export const getBySlug = query({
 
     if (event.userId !== userId) throw new ConvexError("Not authorized.");
 
+    // NOTE: Collecting
+    const attendees = await ctx.db
+      .query("attendees")
+      .withIndex("by_event", (q) => q.eq("eventId", event._id))
+      .collect();
+
     return {
       details: {
         ...event,
@@ -148,6 +154,7 @@ export const getBySlug = query({
             }
           : {}),
       },
+      attendees: attendees,
     };
   },
 });

@@ -9,6 +9,7 @@ import { capitalizeFirstLetter } from "@/lib/utils";
 import EditEventButton from "./EditEventButton";
 import DeleteEventButton from "./DeleteEventButton";
 import { featureNames } from "@/types/events";
+import EventAttendees from "./EventAttendees";
 
 export default function EventClient({
   preloadedEvent,
@@ -34,13 +35,15 @@ export default function EventClient({
             )}
           </TabsList>
           <EditEventButton event={event} className="ml-auto" />
-          <DeleteEventButton eventId={event.details._id}/>
+          <DeleteEventButton eventId={event.details._id} />
         </div>
         <TabsContent value="details">
           <EventDetails details={event.details} />
         </TabsContent>
         {event.details.enabledFeatures.attendees && (
-          <TabsContent value="attendees">hey</TabsContent>
+          <TabsContent value="attendees">
+            <EventAttendees attendees={event.attendees} />
+          </TabsContent>
         )}
       </Tabs>
     </div>

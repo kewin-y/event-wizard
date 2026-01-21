@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { capitalizeFirstLetter } from "@/lib/utils";
 import { EditIcon } from "lucide-react";
-import { EventType } from "../_types";
+import { EventResult } from "../_types";
 import { Dialog } from "@/components/ui/dialog";
 import { useState } from "react";
 import EditDetails from "./form/EditDetails";
@@ -18,7 +18,7 @@ export default function EditEventButton({
   event,
   className,
 }: {
-  event: EventType;
+  event: EventResult;
   className?: string;
 }) {
   const [editDetailsOpen, setEditDetailsOpen] = useState(false);

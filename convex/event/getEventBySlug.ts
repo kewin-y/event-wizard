@@ -194,6 +194,31 @@ export const getEventRootDocument = query({
   },
 });
 
+export const getEventDocument = query({
+  args: {
+    eventId: v.id("events"),
+    documentId: v.id("documentItems"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new ConvexError("Not authenticated.");
+
+    // Verify user owns the event
+    const event = await ctx.db.get(args.eventId);
+    if (!event) return null;
+    if (event.userId !== userId) throw new ConvexError("Not authorized.");
+
+    const documentItem = await ctx.db
+      .query("documentItems")
+      .withIndex("by_id", (q) => q.eq("_id", args.documentId))
+      .unique();
+
+    if (documentItem?.eventId !== event._id) return null;
+
+    return documentItem;
+  },
+});
+
 export const getEventDocuments = query({
   args: {
     paginationOpts: paginationOptsValidator,

@@ -238,16 +238,18 @@ export default function DocumentsForm() {
                 )
                 .map((link) => (
                   <ButtonGroup key={link.id} className="w-full">
-                    <Link
-                      className="inline-flex items-center h-9 px-3 py-2 gap-2 text-sm flex-1 justify-start rounded-none hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 hover:cursor-pointer"
-                      href={link.value}
-                      target="_blank"
+                    <Button
+                      asChild
+                      variant="ghost"
+                      className="flex-1 justify-start rounded-none hover:cursor-pointer font-normal"
                     >
-                      <LinkIcon size={16} />
-                      <span className="w-90 text-left whitespace-nowrap text-ellipsis overflow-hidden">
-                        {link.name}
-                      </span>
-                    </Link>
+                      <Link href={link.value} target="_blank">
+                        <LinkIcon size={16} />
+                        <span className="w-90 text-left whitespace-nowrap text-ellipsis overflow-hidden">
+                          {link.name}
+                        </span>
+                      </Link>
+                    </Button>
                     <LinkActions
                       defaultUrl={link.value}
                       onRenameAction={(url) =>

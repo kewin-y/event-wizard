@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CornerLeftUp, FileIcon, FolderIcon, LinkIcon } from "lucide-react";
 import {
   Card,
@@ -24,6 +25,12 @@ export default function EventDocuments() {
 
   const { details: event, documents: initialDocuments } = useEvent();
 
+  const currentFolder = useQuery(
+    api.event.getEventBySlug.getEventDocument,
+    currentFolderId && event
+      ? { eventId: event._id, documentId: currentFolderId }
+      : "skip",
+  );
   const { results, status, loadMore } = usePaginatedQuery(
     api.event.getEventBySlug.getEventDocuments,
     isAuthenticated && event
@@ -47,30 +54,76 @@ export default function EventDocuments() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div>
-          <Button size="icon-sm" variant="outline">
+          <Button
+            size="icon-sm"
+            variant="outline"
+            onClick={() => setCurrentFolderId(currentFolder?.parentId)}
+            disabled={
+              currentFolderId === undefined || currentFolder === undefined
+            }
+          >
             <CornerLeftUp />
           </Button>
-          <span className="ml-2">Awesome folder</span>
+          <span className="ml-2">
+            {currentFolder ? currentFolder.name : ""}
+          </span>
         </div>
         <div className="border overflow-hidden rounded-md h-72">
           <ScrollArea>
-            {documents.length > 0 &&
-              documents
-                .filter((child) => child.type === "folder")
-                .sort((a, b) =>
-                  a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
-                )
-                .map((document) => (
-                  <Button
-                    key={document._id}
-                    variant="ghost"
-                    className="rounded-none w-full justify-start"
-                    onClick={() => setCurrentFolderId(document._id)}
-                  >
-                    <FolderIcon />
-                    {document.name}
-                  </Button>
-                ))}
+            {documents.length > 0 && (
+              <>
+                {documents
+                  .filter((child) => child.type === "folder")
+                  .sort((a, b) =>
+                    a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+                  )
+                  .map((document) => (
+                    <Button
+                      key={document._id}
+                      variant="ghost"
+                      className="rounded-none w-full justify-start"
+                      onClick={() => setCurrentFolderId(document._id)}
+                    >
+                      <FolderIcon />
+                      {document.name}
+                    </Button>
+                  ))}
+                {documents
+                  .filter((child) => child.type === "link")
+                  .sort((a, b) =>
+                    a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+                  )
+                  .map((document) => (
+                    <Button
+                      key={document._id}
+                      variant="ghost"
+                      className="rounded-none w-full justify-start"
+                      asChild
+                    >
+                      <Link href={document.url!} target="_blank">
+                        <LinkIcon />
+                        {document.name}
+                      </Link>
+                    </Button>
+                  ))}
+                {documents
+                  .filter((child) => child.type === "file")
+                  .sort((a, b) =>
+                    a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+                  )
+                  .map((document) => (
+                    <div
+                      key={document._id}
+                      className="inline-flex items-center h-9 px-3 py-2 gap-2 text-sm flex-1 justify-start rounded-none"
+                    >
+                      <FileIcon size={16} />
+                      <span className="w-90 text-left whitespace-nowrap text-ellipsis overflow-hidden">
+                        {document.name}
+                      </span>
+                    </div>
+                  ))}
+              </>
+            )}
           </ScrollArea>
         </div>
       </CardContent>

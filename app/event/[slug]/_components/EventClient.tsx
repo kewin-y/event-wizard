@@ -12,49 +12,46 @@ import { featureNames } from "@/types/events";
 import EventAttendees from "./EventAttendees";
 import EventQuestions from "./EventQuestions";
 import EventAgenda from "./EventAgenda";
+import { useEvent } from "../_hooks/event-context";
 
-export default function EventClient({
-  preloadedEvent,
-}: {
-  preloadedEvent: Preloaded<typeof api.event.getEventBySlug.default>;
-}) {
-  const event = usePreloadedQuery(preloadedEvent);
+export default function EventClient() {
+  const { details } = useEvent();
 
   const [activeTab, setActiveTab] = useState("details");
 
-  return event ? (
+  return details ? (
     <div className="w-7/12 mx-auto">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="w-full flex items-center gap-2">
           <TabsList>
             <TabsTrigger value="details">Details</TabsTrigger>
             {featureNames.map((feature) =>
-              event.details.enabledFeatures[feature] ? (
+              details.enabledFeatures[feature] ? (
                 <TabsTrigger value={feature} key={`tab-${feature}`}>
                   {capitalizeFirstLetter(feature)}
                 </TabsTrigger>
               ) : null,
             )}
           </TabsList>
-          <EditEventButton event={event} className="ml-auto" />
-          <DeleteEventButton eventId={event.details._id} />
+          <EditEventButton details={details} className="ml-auto" />
+          <DeleteEventButton eventId={details._id} />
         </div>
         <TabsContent value="details">
-          <EventDetails details={event.details} />
+          <EventDetails />
         </TabsContent>
-        {event.details.enabledFeatures.attendees && (
+        {details.enabledFeatures.attendees && (
           <TabsContent value="attendees">
-            <EventAttendees attendees={event.attendees} />
+            <EventAttendees />
           </TabsContent>
         )}
-        {event.details.enabledFeatures.questions && (
+        {details.enabledFeatures.questions && (
           <TabsContent value="questions">
-            <EventQuestions questions={event.questions} />
+            <EventQuestions />
           </TabsContent>
         )}
-        {event.details.enabledFeatures.agenda && (
+        {details.enabledFeatures.agenda && (
           <TabsContent value="agenda">
-            <EventAgenda agenda={event.agenda} />
+            <EventAgenda />
           </TabsContent>
         )}
       </Tabs>

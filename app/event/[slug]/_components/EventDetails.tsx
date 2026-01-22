@@ -7,13 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useEvent } from "../_hooks/event-context";
 
-export default function EventDetails({
-  details,
-}: {
-  details: EventResult["details"];
-}) {
-  return (
+export default function EventDetails() {
+  const { details } = useEvent();
+
+  return details ? (
     <Card className="mx-auto w-full pt-0 overflow-hidden">
       <EventImage name={details.name} imageUrl={details.imageUrl} />
       <CardHeader>
@@ -24,5 +23,5 @@ export default function EventDetails({
         </CardDescription>
       </CardHeader>
     </Card>
-  );
+  ) : null;
 }

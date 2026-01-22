@@ -9,16 +9,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { capitalizeFirstLetter } from "@/lib/utils";
 import { EditIcon } from "lucide-react";
-import { EventResult } from "../_types";
 import { Dialog } from "@/components/ui/dialog";
 import { useState } from "react";
 import EditDetails from "./form/EditDetails";
+import { api } from "@/convex/_generated/api";
 
 export default function EditEventButton({
-  event,
+  details,
   className,
 }: {
-  event: EventResult;
+  details: NonNullable<
+    Awaited<typeof api.event.getEventBySlug.getEventDetails._returnType>
+  >;
   className?: string;
 }) {
   const [editDetailsOpen, setEditDetailsOpen] = useState(false);
@@ -35,7 +37,7 @@ export default function EditEventButton({
         <DropdownMenuContent>
           {[
             "details",
-            ...Object.entries(event.details.enabledFeatures).flatMap(
+            ...Object.entries(details.enabledFeatures).flatMap(
               ([feature, enabled]) => (enabled ? [feature] : []),
             ),
           ].map((name) => (

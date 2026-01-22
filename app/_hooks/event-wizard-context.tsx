@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
   featureNames,
@@ -250,37 +252,21 @@ export function EventWizardProvider({
         imageStorageId: eventImageId,
         enabledFeatures,
       },
-      ...(enabledFeatures.attendees
+      attendees: enabledFeatures.attendees ? finalData.attendees : undefined,
+      questions: enabledFeatures.questions
         ? {
-            attendees: finalData.attendees,
+            questions: await transformQuestions(finalData.questions.questions),
           }
-        : {}),
-      ...(enabledFeatures.questions
+        : undefined,
+      agenda: enabledFeatures.agenda
         ? {
-            questions: {
-              questions: await transformQuestions(
-                finalData.questions.questions,
-              ),
-            },
+            agendaDates: transformAgenda(finalData.agenda.agendaDates),
           }
-        : {}),
-      ...(enabledFeatures.agenda
-        ? {
-            agenda: {
-              agendaDates: transformAgenda(finalData.agenda.agendaDates),
-            },
-          }
-        : {}),
-      ...(enabledFeatures.documents
-        ? {
-            documents: await transformDocuments(finalData.documents),
-          }
-        : {}),
-      ...(enabledFeatures.zoom
-        ? {
-            zoom: finalData.zoom,
-          }
-        : {}),
+        : undefined,
+      documents: enabledFeatures.documents
+        ? await transformDocuments(finalData.documents)
+        : undefined,
+      zoom: enabledFeatures.zoom ? finalData.zoom : undefined,
     });
 
     resetWizard();
@@ -348,7 +334,11 @@ export function EventWizardProvider({
     },
   };
 
-  return <EventWizardContext value={value}>{children}</EventWizardContext>;
+  return (
+    <EventWizardContext.Provider value={value}>
+      {children}
+    </EventWizardContext.Provider>
+  );
 }
 
 export function useEventWizard() {

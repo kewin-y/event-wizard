@@ -5,12 +5,10 @@ import { ConvexError } from "convex/values";
 import EventClient from "./_components/EventClient";
 import SignOutButton from "@/components/SignOutButton";
 import { redirect } from "next/navigation";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import EditEventButton from "./_components/EditEventButton";
-import DeleteEventButton from "./_components/DeleteEventButton";
+import { EventProvider } from "./_hooks/event-context";
 
 export default async function EventPage({
   params,
@@ -24,39 +22,77 @@ export default async function EventPage({
   if (!token) redirect("signin");
 
   try {
-    const preloadedEvent = await preloadQuery(
-      api.event.getEventBySlug.default,
+    const preloadedDetails = await preloadQuery(
+      api.event.getEventBySlug.getEventDetails,
       { slug },
       { token },
     );
 
-    const event = await fetchQuery(
-      api.event.getEventBySlug.default,
+    const details = await fetchQuery(
+      api.event.getEventBySlug.getEventDetails,
       { slug },
       { token },
     );
 
-    return event ? (
+    if (!details) return null;
+
+    const preloadedAttendees = await preloadQuery(
+      api.event.getEventBySlug.getEventAttendees,
+      {
+        paginationOpts: { numItems: 10, cursor: null },
+        eventId: details._id,
+      },
+      { token },
+    );
+
+    const preloadedQuestions = await preloadQuery(
+      api.event.getEventBySlug.getEventQuestions,
+      {
+        paginationOpts: { numItems: 10, cursor: null },
+        eventId: details._id,
+      },
+      { token },
+    );
+
+    const preloadedAgenda = await preloadQuery(
+      api.event.getEventBySlug.getEventAgenda,
+      {
+        paginationOpts: { numItems: 10, cursor: null },
+        eventId: details._id,
+      },
+      { token },
+    );
+
+    return (
       <>
-        <header className="sticky flex items-center gap-3 top-0 z-10 bg-background/80 backdrop-blur-md border-b p-4 shadow-sm">
+        <header className="sticky flex justify-between items-center gap-3 top-0 z-10 bg-background/80 backdrop-blur-md border-b p-4 shadow-sm">
           <Button asChild variant="outline">
             <Link href="/">
               <ArrowLeft />
               Back
             </Link>
           </Button>
-          <h1 className="whitespace-nowrap shrink-0 muted-foreground ml-auto font-bold">
-            {event.details.name}
+          <h1 className="whitespace-nowrap shrink-0 muted-foreground font-bold">
+            {details.name}
           </h1>
-          <SignOutButton className="ml-auto" />
+          <SignOutButton />
         </header>
         <main className="p-12 flex flex-col gap-12">
-          <EventClient preloadedEvent={preloadedEvent} />
+          <EventProvider
+            preloadedDetails={preloadedDetails}
+            preloadedAttendees={preloadedAttendees}
+            preloadedQuestions={preloadedQuestions}
+            preloadedAgenda={preloadedAgenda}
+          >
+            <EventClient />
+          </EventProvider>
         </main>
       </>
-    ) : null;
+    );
   } catch (e) {
     if (e instanceof ConvexError) {
+      return <div>{e.data}</div>;
+    } else if (e instanceof Error) {
       return <div>{e.message}</div>;
     }
   }

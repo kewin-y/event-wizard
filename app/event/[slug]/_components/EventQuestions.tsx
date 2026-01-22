@@ -5,19 +5,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { EventResult } from "../_types";
 import { Fragment } from "react/jsx-runtime";
 import { Separator } from "@/components/ui/separator";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ImageIcon } from "lucide-react";
-import Image from "next/image";
 import ImageTooltip from "./ImageTooltip";
 import SectionHeader from "@/components/ui/SectionHeader";
+import { api } from "@/convex/_generated/api";
+import { useConvexAuth, usePaginatedQuery } from "convex/react";
+import { useEvent } from "../_hooks/event-context";
+import LoadingHeader from "@/components/LoadingHeader";
+import { Button } from "@/components/ui/button";
 
 function QuestionContent({
   title,
@@ -64,11 +66,20 @@ function QuestionContent({
   );
 }
 
-export default function EventQuestions({
-  questions,
-}: {
-  questions: EventResult["questions"];
-}) {
+export default function EventQuestions() {
+  const { isAuthenticated } = useConvexAuth();
+
+  const { details: event, questions: initialQuestions } = useEvent();
+
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.event.getEventBySlug.getEventQuestions,
+    isAuthenticated && event ? { eventId: event._id } : "skip",
+    { initialNumItems: 10 },
+  );
+
+  const questions =
+    status === "LoadingFirstPage" ? initialQuestions.page : results;
+
   return (
     <Card>
       <CardHeader className="border-b">
@@ -100,6 +111,19 @@ export default function EventQuestions({
             </div>
           </div>
         ))}
+        {status === "LoadingMore" && <LoadingHeader />}
+        {status === "CanLoadMore" && (
+          <>
+            <Separator />
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={() => loadMore(10)}
+            >
+              Load More
+            </Button>
+          </>
+        )}
       </CardContent>
     </Card>
   );

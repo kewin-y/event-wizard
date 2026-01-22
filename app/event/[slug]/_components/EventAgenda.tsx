@@ -5,26 +5,39 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { EventResult } from "../_types";
 
 import { Fragment } from "react/jsx-runtime";
 import { Separator } from "@/components/ui/separator";
-import SectionHeader from "@/components/ui/SectionHeader";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { api } from "@/convex/_generated/api";
+import { useConvexAuth, usePaginatedQuery } from "convex/react";
+import { useEvent } from "../_hooks/event-context";
+import { Button } from "@/components/ui/button";
+import LoadingHeader from "@/components/LoadingHeader";
 
-export default function EventAgenda({
-  agenda,
-}: {
-  agenda: EventResult["agenda"];
-}) {
+export default function EventAgenda() {
+  const { isAuthenticated } = useConvexAuth();
+
+  const { details: event, agenda: initialAgenda } = useEvent();
+
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.event.getEventBySlug.getEventAgenda,
+    isAuthenticated && event ? { eventId: event._id } : "skip",
+    { initialNumItems: 10 },
+  );
+
+  const agenda = status === "LoadingFirstPage" ? initialAgenda.page : results;
+
+  console.log(status);
+
   return (
     <Card>
       <CardHeader className="border-b">
@@ -36,21 +49,19 @@ export default function EventAgenda({
       <CardContent className="flex flex-col gap-6">
         {agenda.map((agendaDate, i) => (
           <Fragment key={agendaDate._id}>
-            <CardTitle>
-              {new Date(agendaDate.date).toISOString().slice(0, 10)}
-            </CardTitle>
+            {" "}
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[150px]">Title</TableHead>
+                  <TableHead className="w-[150px]">Item</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead className="text-right">Start</TableHead>
                   <TableHead className="text-right">End</TableHead>
                 </TableRow>
               </TableHeader>
-              {agendaDate.items.map((itm) => (
-                <TableBody key={itm._id}>
-                  <TableRow>
+              <TableBody>
+                {agendaDate.items.map((itm) => (
+                  <TableRow key={itm._id}>
                     <TableCell className="font-medium">{itm.title}</TableCell>
                     <TableCell>{itm.description || "N/A"}</TableCell>
                     <TableCell className="text-right">
@@ -60,12 +71,36 @@ export default function EventAgenda({
                       {itm.endTime || "N/A"}
                     </TableCell>
                   </TableRow>
-                </TableBody>
-              ))}
+                ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="text-center text-muted-foreground font-normal"
+                  >
+                    Agenda items for{" "}
+                    {new Date(agendaDate.date).toISOString().slice(0, 10)}
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
             </Table>
             {i < agenda.length - 1 && <Separator />}
           </Fragment>
         ))}
+        {status === "LoadingMore" && <LoadingHeader />}
+        {status === "CanLoadMore" && (
+          <>
+            <Separator />
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={() => loadMore(10)}
+            >
+              Load More
+            </Button>
+          </>
+        )}
       </CardContent>
     </Card>
   );

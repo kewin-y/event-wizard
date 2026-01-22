@@ -25,11 +25,16 @@ export default async function EventPage({
 
   try {
     const preloadedEvent = await preloadQuery(
-      api.events.getBySlug,
+      api.event.getEventBySlug.default,
       { slug },
       { token },
     );
-    const event = await fetchQuery(api.events.getBySlug, { slug }, { token });
+
+    const event = await fetchQuery(
+      api.event.getEventBySlug.default,
+      { slug },
+      { token },
+    );
 
     return event ? (
       <>

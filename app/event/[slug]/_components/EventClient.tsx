@@ -16,7 +16,7 @@ import EventAgenda from "./EventAgenda";
 export default function EventClient({
   preloadedEvent,
 }: {
-  preloadedEvent: Preloaded<typeof api.events.getBySlug>;
+  preloadedEvent: Preloaded<typeof api.event.getEventBySlug.default>;
 }) {
   const event = usePreloadedQuery(preloadedEvent);
 
@@ -49,12 +49,12 @@ export default function EventClient({
         )}
         {event.details.enabledFeatures.questions && (
           <TabsContent value="questions">
-            <EventQuestions questions={event.questions}/>
+            <EventQuestions questions={event.questions} />
           </TabsContent>
         )}
         {event.details.enabledFeatures.agenda && (
           <TabsContent value="agenda">
-            <EventAgenda agenda={event.agenda}/>
+            <EventAgenda agenda={event.agenda} />
           </TabsContent>
         )}
       </Tabs>

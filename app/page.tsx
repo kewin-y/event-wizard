@@ -21,7 +21,7 @@ export default async function Home(props: {
   if (!token) redirect("/signin");
 
   const preloadedEvents = await preloadQuery(
-    api.events.list,
+    api.event.getEvents.default,
     {
       paginationOpts: { numItems: 10, cursor: null },
       search,

@@ -62,7 +62,7 @@ export default function DetailsForm() {
                 if (!value) return;
 
                 const isSlugUnique = await convex.query(
-                  api.events.isSlugUnique,
+                  api.event.isEventSlugUnique.default,
                   {
                     slug: value,
                   },

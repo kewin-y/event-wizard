@@ -9,7 +9,11 @@
  */
 
 import type * as auth from "../auth.js";
-import type * as events from "../events.js";
+import type * as event_createEvent from "../event/createEvent.js";
+import type * as event_deleteEvent from "../event/deleteEvent.js";
+import type * as event_getEventBySlug from "../event/getEventBySlug.js";
+import type * as event_getEvents from "../event/getEvents.js";
+import type * as event_isEventSlugUnique from "../event/isEventSlugUnique.js";
 import type * as http from "../http.js";
 import type * as storage from "../storage.js";
 
@@ -21,7 +25,11 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
-  events: typeof events;
+  "event/createEvent": typeof event_createEvent;
+  "event/deleteEvent": typeof event_deleteEvent;
+  "event/getEventBySlug": typeof event_getEventBySlug;
+  "event/getEvents": typeof event_getEvents;
+  "event/isEventSlugUnique": typeof event_isEventSlugUnique;
   http: typeof http;
   storage: typeof storage;
 }>;

@@ -26,7 +26,7 @@ export default function DeleteEventButton({
   eventId: Id<"events">;
 }) {
   const router = useRouter();
-  const deleteEvent = useMutation(api.events.deleteById);
+  const deleteEvent = useMutation(api.event.deleteEvent.default);
 
   async function onDelete() {
     console.log("DELETING EVENT");

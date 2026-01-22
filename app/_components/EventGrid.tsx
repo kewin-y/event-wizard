@@ -24,15 +24,15 @@ export default function EventGrid({
   preloadedEvents,
   search,
 }: {
-  preloadedEvents: Preloaded<typeof api.events.list>;
+  preloadedEvents: Preloaded<typeof api.event.getEvents.default>;
   search: string;
 }) {
-  const { isAuthenticated, isLoading } = useConvexAuth();
+  const { isAuthenticated } = useConvexAuth();
 
   const initialEvents = usePreloadedQuery(preloadedEvents);
 
   const { results, status, loadMore } = usePaginatedQuery(
-    api.events.list,
+    api.event.getEvents.default,
     isAuthenticated ? { search } : "skip",
     { initialNumItems: 10 },
   );

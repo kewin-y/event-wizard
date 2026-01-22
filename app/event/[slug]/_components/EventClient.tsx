@@ -13,6 +13,7 @@ import EventAttendees from "./EventAttendees";
 import EventQuestions from "./EventQuestions";
 import EventAgenda from "./EventAgenda";
 import { useEvent } from "../_hooks/event-context";
+import EventDocuments from "./EventDocuments";
 
 export default function EventClient() {
   const { details } = useEvent();
@@ -52,6 +53,11 @@ export default function EventClient() {
         {details.enabledFeatures.agenda && (
           <TabsContent value="agenda">
             <EventAgenda />
+          </TabsContent>
+        )}
+        {details.enabledFeatures.documents && (
+          <TabsContent value="documents">
+            <EventDocuments />
           </TabsContent>
         )}
       </Tabs>

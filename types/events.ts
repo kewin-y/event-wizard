@@ -101,7 +101,7 @@ export const ZoomSchema = z.object({
   meetingPassword: z
     .string()
     .nonempty({ error: "Meeting password must be nonempty." }),
-  url: z.url({ hostname: /^.*\.zoom.us$/, error: "Enter a valid Zoom URL" }),
+  url: z.url({ hostname: /^[.*\.]?zoom.us$/, error: "Enter a valid Zoom URL" }),
 });
 
 export type DetailsValues = z.infer<typeof DetailsSchema>;

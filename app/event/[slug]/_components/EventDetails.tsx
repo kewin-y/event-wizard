@@ -1,8 +1,6 @@
 import EventImage from "@/components/EventImage";
-import { EventResult } from "../_types";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,

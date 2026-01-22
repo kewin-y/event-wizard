@@ -16,6 +16,7 @@ export const getEventDetails = query({
       .unique();
 
     if (!event) return null;
+
     if (event.userId !== userId) throw new ConvexError("Not authorized.");
 
     return {
@@ -39,13 +40,23 @@ export const getEventAttendees = query({
 
     // Verify user owns the event
     const event = await ctx.db.get(args.eventId);
-    if (!event) throw new ConvexError("Event not found.");
+
+    if (!event) {
+      return {
+        page: [],
+        isDone: true,
+        continueCursor: "",
+      };
+    }
+
     if (event.userId !== userId) throw new ConvexError("Not authorized.");
 
-    return await ctx.db
+    const foo = await ctx.db
       .query("attendees")
       .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
       .paginate(args.paginationOpts);
+
+    return foo;
   },
 });
 
@@ -61,7 +72,13 @@ export const getEventQuestions = query({
 
     // Verify user owns the event
     const event = await ctx.db.get(args.eventId);
-    if (!event) throw new ConvexError("Event not found.");
+    if (!event) {
+      return {
+        page: [],
+        isDone: true,
+        continueCursor: "",
+      };
+    }
     if (event.userId !== userId) throw new ConvexError("Not authorized.");
 
     const result = await ctx.db
@@ -82,7 +99,7 @@ export const getEventQuestions = query({
             imageUrl: option.imageStorageId
               ? await ctx.storage.getUrl(option.imageStorageId)
               : undefined,
-          }))
+          })),
         );
 
         return {
@@ -92,7 +109,7 @@ export const getEventQuestions = query({
             : undefined,
           options: transformedOptions,
         };
-      })
+      }),
     );
 
     return {
@@ -114,7 +131,13 @@ export const getEventAgenda = query({
 
     // Verify user owns the event
     const event = await ctx.db.get(args.eventId);
-    if (!event) throw new ConvexError("Event not found.");
+    if (!event) {
+      return {
+        page: [],
+        isDone: true,
+        continueCursor: "",
+      };
+    }
     if (event.userId !== userId) throw new ConvexError("Not authorized.");
 
     const result = await ctx.db
@@ -128,100 +151,77 @@ export const getEventAgenda = query({
         items: await ctx.db
           .query("agendaItems")
           .withIndex("by_agendaDate", (q) =>
-            q.eq("agendaDateId", agendaDate._id)
+            q.eq("agendaDateId", agendaDate._id),
           )
           .collect(),
-      }))
+      })),
     );
 
     return {
       ...result,
-      page
+      page,
     };
   },
 });
 
-// Original query kept for backward compatibility (optional)
-export const getEventBySlug = query({
-  args: { slug: v.string() },
+export const getEventRootDocument = query({
+  args: {
+    eventId: v.id("events"),
+  },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new ConvexError("Not authenticated.");
 
-    const event = await ctx.db
-      .query("events")
-      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
-      .unique();
-
-    if (!event) return null;
-
+    // Verify user owns the event
+    const event = await ctx.db.get(args.eventId);
+    if (!event) {
+      return {
+        page: [],
+        isDone: true,
+        continueCursor: "",
+      };
+    }
     if (event.userId !== userId) throw new ConvexError("Not authorized.");
 
-    const attendees = await ctx.db
-      .query("attendees")
-      .withIndex("by_event", (q) => q.eq("eventId", event._id))
-      .collect();
+    const rootDocument = await ctx.db
+      .query("documentItems")
+      .withIndex("by_event_and_parent", (q) =>
+        q.eq("eventId", args.eventId).eq("parentId", undefined),
+      )
+      .unique();
 
-    const questions = await ctx.db
-      .query("questions")
-      .withIndex("by_event", (q) => q.eq("eventId", event._id))
-      .collect();
-
-    const transformedQuestions = await Promise.all(
-      questions.map(async (question) => {
-        const options = await ctx.db
-          .query("questionOptions")
-          .withIndex("by_question", (q) => q.eq("questionId", question._id))
-          .collect();
-
-        const transformedOptions = await Promise.all(
-          options.map(async (option) => ({
-            ...option,
-            imageUrl: option.imageStorageId
-              ? await ctx.storage.getUrl(option.imageStorageId)
-              : undefined,
-          }))
-        );
-
-        return {
-          ...question,
-          imageUrl: question.imageStorageId
-            ? await ctx.storage.getUrl(question.imageStorageId)
-            : undefined,
-          options: transformedOptions,
-        };
-      })
-    );
-
-    const agenda = await ctx.db
-      .query("agendaDates")
-      .withIndex("by_event", (q) => q.eq("eventId", event._id))
-      .collect();
-
-    const transformedAgenda = await Promise.all(
-      agenda.map(async (agendaDate) => ({
-        ...agendaDate,
-        items: await ctx.db
-          .query("agendaItems")
-          .withIndex("by_agendaDate", (q) =>
-            q.eq("agendaDateId", agendaDate._id)
-          )
-          .collect(),
-      }))
-    );
-
-    return {
-      details: {
-        ...event,
-        imageUrl: event.imageStorageId
-          ? await ctx.storage.getUrl(event.imageStorageId)
-          : undefined,
-      },
-      attendees: attendees,
-      questions: transformedQuestions,
-      agenda: transformedAgenda,
-    };
+    return rootDocument;
   },
 });
 
-export default getEventBySlug;
+export const getEventDocuments = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    eventId: v.id("events"),
+    parentId: v.optional(v.id("documentItems")),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new ConvexError("Not authenticated.");
+
+    // Verify user owns the event
+    const event = await ctx.db.get(args.eventId);
+    if (!event) {
+      return {
+        page: [],
+        isDone: true,
+        continueCursor: "",
+      };
+    }
+    if (event.userId !== userId) throw new ConvexError("Not authorized.");
+
+    const documentItems = await ctx.db
+      .query("documentItems")
+      .withIndex("by_event_and_parent", (q) =>
+        q.eq("eventId", args.eventId).eq("parentId", args.parentId),
+      )
+      .paginate(args.paginationOpts);
+
+    return documentItems;
+  },
+});

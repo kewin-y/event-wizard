@@ -29,10 +29,10 @@ export default function DeleteEventButton({
   const deleteEvent = useMutation(api.event.deleteEvent.default);
 
   async function onDelete() {
-    console.log("DELETING EVENT");
     await deleteEvent({ id: eventId });
     router.replace("/");
   }
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>

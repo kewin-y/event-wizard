@@ -109,14 +109,19 @@ const createEvent = mutation({
     ): Promise<void[]> =>
       Promise.all(
         docs.map(async (doc) => {
-          const docId = await ctx.db.insert("documentItems", {
-            type: doc.type,
-            name: doc.name,
-            storageId: doc.type === "file" ? doc.value : undefined,
-            url: doc.type === "link" ? doc.value : undefined,
-            eventId,
-            parentId,
-          });
+          let docId = undefined;
+
+          // Don't insert root document
+          if (doc.id !== "root") {
+            docId = await ctx.db.insert("documentItems", {
+              type: doc.type,
+              name: doc.name,
+              storageId: doc.type === "file" ? doc.value : undefined,
+              url: doc.type === "link" ? doc.value : undefined,
+              eventId,
+              parentId,
+            });
+          }
 
           if (doc.type === "folder") {
             await insertDocuments(docId, doc.children);

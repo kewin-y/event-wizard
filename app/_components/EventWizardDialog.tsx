@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import SetupForm from "./SetupForm";
+import DetailsForm from "./DetailsForm";
 import AttendeesForm from "./AttendeesForm";
 import QuestionsForm from "./QuestionsForm";
 import AgendaForm from "./AgendaForm";
@@ -47,8 +47,9 @@ function EventWizardDialogInner() {
     <>
       <Dialog open={wizardOpen} onOpenChange={toggleWizard}>
         <DialogTrigger asChild>
-          <Button className="fixed bottom-12 right-12 w-12 h-12 hover:cursor-pointer">
+          <Button>
             <Plus />
+            Create Event
           </Button>
         </DialogTrigger>
         <DialogContent>
@@ -59,7 +60,7 @@ function EventWizardDialogInner() {
             </DialogDescription>
           </DialogHeader>
           <Separator />
-          {step.name === "setup" && <SetupForm />}
+          {step.name === "details" && <DetailsForm />}
           {step.name === "attendees" && <AttendeesForm />}
           {step.name === "questions" && <QuestionsForm />}
           {step.name === "agenda" && <AgendaForm />}

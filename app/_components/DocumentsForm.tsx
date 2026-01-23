@@ -10,9 +10,7 @@ import {
   FieldContent,
   FieldDescription,
   FieldLabel,
-  FieldLegend,
   FieldSeparator,
-  FieldSet,
 } from "@/components/ui/field";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
@@ -133,7 +131,7 @@ function findDocument(
 }
 
 export default function DocumentsForm() {
-  const { data, prev, next } = useEventWizard();
+  const { step, data, prev, next } = useEventWizard();
 
   const [tree, setTree] = useState<DocumentItem[]>(data.documents);
 
@@ -149,7 +147,7 @@ export default function DocumentsForm() {
           <FieldDescription>Add documents to your event.</FieldDescription>
         </FieldContent>
         <FieldSeparator />
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-3 items-center" id={step.formId}>
           <Button
             variant="outline"
             size="icon-sm"
@@ -165,7 +163,7 @@ export default function DocumentsForm() {
           <span>{currentFolder.name}</span>
 
           <AddDocumentActions
-            addFolder={(name) => {
+            addFolderAction={(name) => {
               setTree((current) =>
                 addDocument(
                   name,
@@ -175,7 +173,7 @@ export default function DocumentsForm() {
                 ),
               );
             }}
-            addLink={(url) => {
+            addLinkAction={(url) => {
               setTree((current) =>
                 addDocument(
                   url,
@@ -185,7 +183,7 @@ export default function DocumentsForm() {
                 ),
               );
             }}
-            addFile={(file) =>
+            addFileAction={(file) =>
               setTree((current) =>
                 addDocument(
                   file.name,
@@ -222,12 +220,12 @@ export default function DocumentsForm() {
                     </Button>
                     <FolderActions
                       defaultName={folder.name}
-                      onRename={(name) => {
+                      onRenameAction={(name) => {
                         setTree((current) =>
                           renameDocument(folder.id, name, current),
                         );
                       }}
-                      onDelete={() =>
+                      onDeleteAction={() =>
                         setTree((current) => deleteDocument(folder.id, current))
                       }
                     />
@@ -240,24 +238,26 @@ export default function DocumentsForm() {
                 )
                 .map((link) => (
                   <ButtonGroup key={link.id} className="w-full">
-                    <Link
-                      className="inline-flex items-center h-9 px-3 py-2 gap-2 text-sm flex-1 justify-start rounded-none hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 hover:cursor-pointer"
-                      href={link.value}
-                      target="_blank"
+                    <Button
+                      asChild
+                      variant="ghost"
+                      className="flex-1 justify-start rounded-none hover:cursor-pointer font-normal"
                     >
-                      <LinkIcon size={16} />
-                      <span className="w-90 text-left whitespace-nowrap text-ellipsis overflow-hidden">
-                        {link.name}
-                      </span>
-                    </Link>
+                      <Link href={link.value} target="_blank">
+                        <LinkIcon size={16} />
+                        <span className="w-90 text-left whitespace-nowrap text-ellipsis overflow-hidden">
+                          {link.name}
+                        </span>
+                      </Link>
+                    </Button>
                     <LinkActions
                       defaultUrl={link.value}
-                      onRename={(url) =>
+                      onRenameAction={(url) =>
                         setTree((current) =>
                           renameDocument(link.id, url, current),
                         )
                       }
-                      onDelete={() =>
+                      onDeleteAction={() =>
                         setTree((current) => deleteDocument(link.id, current))
                       }
                     />
@@ -277,7 +277,7 @@ export default function DocumentsForm() {
                       </span>
                     </div>
                     <FileActions
-                      onDelete={() =>
+                      onDeleteAction={() =>
                         setTree((current) => deleteDocument(file.id, current))
                       }
                     />

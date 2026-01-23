@@ -4,7 +4,7 @@ import { useEventWizard } from "../_hooks/event-wizard-context";
 import EventWizardProgress from "./EventWizardProgress";
 
 import { useAppForm } from "@/hooks/form";
-import { featureNames, FeatureName, SetupSchema } from "@/types/events";
+import { featureNames, FeatureName, DetailsSchema } from "@/types/events";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -14,23 +14,24 @@ import {
   FieldGroup,
   FieldLabel,
   FieldLegend,
-  FieldSeparator,
   FieldSet,
 } from "@/components/ui/field";
 
 import { capitalizeFirstLetter } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
+import { useConvex } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
-export default function SetupForm() {
-  const { step, data, next, setSetupFeatures } = useEventWizard();
+export default function DetailsForm() {
+  const { step, data, next, setEnabledFeatures } = useEventWizard();
+  const convex = useConvex();
 
   const form = useAppForm({
-    defaultValues: data.setup,
+    defaultValues: data.details,
     validators: {
-      onChange: SetupSchema,
+      onChange: DetailsSchema,
     },
     onSubmit: async ({ value }) => {
-      next({ setup: value });
+      next({ details: value });
     },
   });
 
@@ -52,13 +53,29 @@ export default function SetupForm() {
                 description="The name for your event."
               />
             )}
-          />{" "}
+          />
           <form.AppField
             name="slug"
+            validators={{
+              onChangeAsyncDebounceMs: 500,
+              onChangeAsync: async ({ value }) => {
+                if (!value) return;
+
+                const isSlugUnique = await convex.query(
+                  api.event.isEventSlugUnique.default,
+                  {
+                    slug: value,
+                  },
+                );
+
+                if (!isSlugUnique)
+                  return { message: "Event with same slug already exists." };
+              },
+            }}
             children={(field) => (
               <field.TextField
                 label="Slug"
-                description="The slug for your event. Will be used in the URL."
+                description="The slug for your event. Will be used in the URL. Must be unique per event."
               />
             )}
           />
@@ -112,7 +129,7 @@ export default function SetupForm() {
                                 );
                               }
 
-                              setSetupFeatures(nextFeatures);
+                              setEnabledFeatures(nextFeatures);
                             }}
                           />
                           <FieldLabel

@@ -1,30 +1,12 @@
-import { v } from "convex/values";
-import { query, mutation, action } from "./_generated/server";
-import { api } from "./_generated/api";
+import { ConvexError, v } from "convex/values";
+import { mutation } from "../_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { Id } from "./_generated/dataModel";
-import { TransformedDocumentItem } from "../types/events";
+import { Id } from "../_generated/dataModel";
+import { TransformedDocumentItem } from "../../types/events";
 
-export const getEvents = query({
-  handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-
-    if (!userId) throw new Error("Not authenticated.");
-
-    // collect has upper limit (4000 documents)
-    // TODO: rewrite and figure out a way to paginate instead
-    const events = await ctx.db
-      .query("events")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .collect();
-
-    return events;
-  },
-});
-
-export const createEvent = mutation({
+const createEvent = mutation({
   args: {
-    setup: v.object({
+    details: v.object({
       name: v.string(),
       slug: v.string(),
       imageStorageId: v.optional(v.id("_storage")),
@@ -105,10 +87,19 @@ export const createEvent = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
 
-    if (!userId) throw new Error("Not authenticated.");
+    if (!userId) throw new ConvexError("Not authenticated.");
+
+    const existing = await ctx.db
+      .query("events")
+      .withIndex("by_slug", (q) => q.eq("slug", args.details.slug))
+      .unique();
+
+    if (existing) {
+      throw new Error("Event with same slug already exists");
+    }
 
     const eventId = await ctx.db.insert("events", {
-      ...args.setup,
+      ...args.details,
       userId: userId,
     });
 
@@ -118,14 +109,19 @@ export const createEvent = mutation({
     ): Promise<void[]> =>
       Promise.all(
         docs.map(async (doc) => {
-          const docId = await ctx.db.insert("documentItems", {
-            type: doc.type,
-            name: doc.name,
-            storageId: doc.type === "file" ? doc.value : undefined,
-            url: doc.type === "link" ? doc.value : undefined,
-            eventId,
-            parentId,
-          });
+          let docId = undefined;
+
+          // Don't insert root document
+          if (doc.id !== "root") {
+            docId = await ctx.db.insert("documentItems", {
+              type: doc.type,
+              name: doc.name,
+              storageId: doc.type === "file" ? doc.value : undefined,
+              url: doc.type === "link" ? doc.value : undefined,
+              eventId,
+              parentId,
+            });
+          }
 
           if (doc.type === "folder") {
             await insertDocuments(docId, doc.children);
@@ -133,7 +129,7 @@ export const createEvent = mutation({
         }),
       );
 
-    if (args.setup.enabledFeatures.attendees && args.attendees) {
+    if (args.details.enabledFeatures.attendees && args.attendees) {
       for (const attendee of args.attendees.attendees) {
         await ctx.db.insert("attendees", {
           ...attendee,
@@ -142,9 +138,9 @@ export const createEvent = mutation({
       }
     }
 
-    if (args.setup.enabledFeatures.questions && args.questions) {
+    if (args.details.enabledFeatures.questions && args.questions) {
       for (const question of args.questions.questions) {
-        const { options, ...q } = question;
+        const { options: _, ...q } = question;
 
         const questionId = await ctx.db.insert("questions", {
           eventId,
@@ -161,7 +157,7 @@ export const createEvent = mutation({
       }
     }
 
-    if (args.setup.enabledFeatures.agenda && args.agenda) {
+    if (args.details.enabledFeatures.agenda && args.agenda) {
       for (const agendaDate of args.agenda.agendaDates) {
         const agendaDateId = await ctx.db.insert("agendaDates", {
           eventId,
@@ -178,14 +174,14 @@ export const createEvent = mutation({
       }
     }
 
-    if (args.setup.enabledFeatures.documents && args.documents) {
+    if (args.details.enabledFeatures.documents && args.documents) {
       await insertDocuments(
         undefined,
         args.documents as TransformedDocumentItem[],
       );
     }
 
-    if (args.setup.enabledFeatures.zoom && args.zoom) {
+    if (args.details.enabledFeatures.zoom && args.zoom) {
       await ctx.db.insert("zoomMeetings", {
         ...args.zoom,
         eventId,
@@ -193,3 +189,5 @@ export const createEvent = mutation({
     }
   },
 });
+
+export default createEvent;

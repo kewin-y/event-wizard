@@ -19,7 +19,13 @@ export default defineSchema({
       documents: v.optional(v.boolean()),
       zoom: v.optional(v.boolean()),
     }),
-  }).index("by_user", ["userId"]),
+  })
+    .searchIndex("search_name", {
+      searchField: "name",
+      filterFields: ["userId"],
+    })
+    .index("by_user", ["userId"])
+    .index("by_slug", ["slug"]),
   attendees: defineTable({
     eventId: v.id("events"),
     name: v.string(),
@@ -64,7 +70,8 @@ export default defineSchema({
   }).index("by_event_and_parent", ["eventId", "parentId"]),
   zoomMeetings: defineTable({
     eventId: v.id("events"),
-    password: v.optional(v.string()),
+    meetingId: v.string(),
+    meetingPassword: v.optional(v.string()),
     url: v.string(),
   }).index("by_event", ["eventId"]),
 });

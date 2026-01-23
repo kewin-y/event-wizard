@@ -32,7 +32,7 @@ const imageSchema = z
   )
   .nullish();
 
-export const SetupSchema = z.object({
+export const DetailsSchema = z.object({
   name: z.string().min(1, "Event name must be nonempty."),
   slug: z
     .string()
@@ -101,10 +101,10 @@ export const ZoomSchema = z.object({
   meetingPassword: z
     .string()
     .nonempty({ error: "Meeting password must be nonempty." }),
-  url: z.url({ hostname: /^zoom.us$/, error: "Enter a valid Zoom URL" }),
+  url: z.url({ hostname: /^[.*\.]?zoom.us$/, error: "Enter a valid Zoom URL" }),
 });
 
-export type SetupValues = z.infer<typeof SetupSchema>;
+export type DetailsValues = z.infer<typeof DetailsSchema>;
 export type AttendeesValues = z.infer<typeof AttendeesSchema>;
 export type QuestionsValues = z.infer<typeof QuestionsSchema>;
 export type AgendaValues = z.infer<typeof AgendaSchema>;

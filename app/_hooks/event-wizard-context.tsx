@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
   featureNames,
@@ -5,7 +7,7 @@ import {
   AttendeesValues,
   FeatureName,
   QuestionsValues,
-  SetupValues,
+  DetailsValues,
   ZoomValues,
   DocumentItem,
   TransformedDocumentItem,
@@ -15,7 +17,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
 type WizardData = {
-  setup: SetupValues;
+  details: DetailsValues;
   attendees: AttendeesValues;
   questions: QuestionsValues;
   agenda: AgendaValues;
@@ -24,7 +26,7 @@ type WizardData = {
 };
 
 const FORM_IDS = {
-  setup: "wizard-setup",
+  details: "wizard-details",
   attendees: "wizard-attendees",
   questions: "wizard-questions",
   agenda: "wizard-agenda",
@@ -34,15 +36,15 @@ const FORM_IDS = {
 
 type EventWizardContextValue = {
   step: {
-    name: FeatureName | "setup";
-    formId: (typeof FORM_IDS)[FeatureName | "setup"];
+    name: FeatureName | "details";
+    formId: (typeof FORM_IDS)[FeatureName | "details"];
     idx: number;
   };
 
   totalSteps: number;
   data: WizardData;
 
-  setSetupFeatures: (features: FeatureName[]) => void;
+  setEnabledFeatures: (features: FeatureName[]) => void;
   next: (partial?: Partial<WizardData>) => void;
   prev: (parital?: Partial<WizardData>) => void;
 
@@ -57,7 +59,7 @@ type EventWizardContextValue = {
 const EventWizardContext = createContext<EventWizardContextValue | null>(null);
 
 // Default event values {
-const defaultSetupValues: SetupValues = {
+const defaultDetailsValuese: DetailsValues = {
   name: "",
   slug: "",
   image: undefined,
@@ -122,7 +124,7 @@ export function EventWizardProvider({
   const [alertOpen, setAlertOpen] = useState(false);
 
   const [data, setData] = useState<WizardData>({
-    setup: defaultSetupValues,
+    details: defaultDetailsValuese,
     attendees: defaultAttendeesValues,
     questions: defaultQuestionsValues,
     agenda: defaultAgendaValues,
@@ -134,14 +136,14 @@ export function EventWizardProvider({
 
   // Use filtering to retain order
   const enabledFeatures = featureNames.filter((feature) =>
-    data.setup.features.includes(feature),
+    data.details.features.includes(feature),
   );
 
-  const steps: ("setup" | FeatureName)[] = ["setup", ...enabledFeatures];
+  const steps: ("details" | FeatureName)[] = ["details", ...enabledFeatures];
   const currentStep = steps[stepIdx];
 
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
-  const createEvent = useMutation(api.events.createEvent);
+  const createEvent = useMutation(api.event.createEvent.default);
 
   const dataRef = useRef(data);
 
@@ -217,7 +219,7 @@ export function EventWizardProvider({
 
   function resetWizard() {
     setData({
-      setup: defaultSetupValues,
+      details: defaultDetailsValuese,
       attendees: defaultAttendeesValues,
       questions: defaultQuestionsValues,
       agenda: defaultAgendaValues,
@@ -231,57 +233,40 @@ export function EventWizardProvider({
 
   async function onFinished(partial?: Partial<WizardData>) {
     const finalData = { ...dataRef.current, ...partial };
-    console.log(finalData);
 
-    const eventImageId = finalData.setup.image
-      ? await generateFile(finalData.setup.image)
+    const eventImageId = finalData.details.image
+      ? await generateFile(finalData.details.image)
       : undefined;
 
     const enabledFeatures = Object.fromEntries(
       featureNames.map((feature) => [
         feature,
-        finalData.setup.features.includes(feature),
+        finalData.details.features.includes(feature),
       ]),
     ) as Record<FeatureName, boolean>;
 
     await createEvent({
-      setup: {
-        name: finalData.setup.name,
-        slug: finalData.setup.slug,
+      details: {
+        name: finalData.details.name,
+        slug: finalData.details.slug,
         imageStorageId: eventImageId,
         enabledFeatures,
       },
-      ...(enabledFeatures.attendees
+      attendees: enabledFeatures.attendees ? finalData.attendees : undefined,
+      questions: enabledFeatures.questions
         ? {
-            attendees: finalData.attendees,
+            questions: await transformQuestions(finalData.questions.questions),
           }
-        : {}),
-      ...(enabledFeatures.questions
+        : undefined,
+      agenda: enabledFeatures.agenda
         ? {
-            questions: {
-              questions: await transformQuestions(
-                finalData.questions.questions,
-              ),
-            },
+            agendaDates: transformAgenda(finalData.agenda.agendaDates),
           }
-        : {}),
-      ...(enabledFeatures.agenda
-        ? {
-            agenda: {
-              agendaDates: transformAgenda(finalData.agenda.agendaDates),
-            },
-          }
-        : {}),
-      ...(enabledFeatures.documents
-        ? {
-            documents: await transformDocuments(finalData.documents),
-          }
-        : {}),
-      ...(enabledFeatures.zoom
-        ? {
-            zoom: finalData.zoom,
-          }
-        : {}),
+        : undefined,
+      documents: enabledFeatures.documents
+        ? await transformDocuments(finalData.documents)
+        : undefined,
+      zoom: enabledFeatures.zoom ? finalData.zoom : undefined,
     });
 
     resetWizard();
@@ -309,12 +294,12 @@ export function EventWizardProvider({
         setAlertOpen(true);
       }
     },
-    setSetupFeatures(features) {
+    setEnabledFeatures(features) {
       setData((current) => {
         const newData = {
           ...current,
-          setup: { ...current.setup, features },
-        };
+          details: { ...current.details, features },
+        } as WizardData;
         dataRef.current = newData;
         return newData;
       });
@@ -349,7 +334,11 @@ export function EventWizardProvider({
     },
   };
 
-  return <EventWizardContext value={value}>{children}</EventWizardContext>;
+  return (
+    <EventWizardContext.Provider value={value}>
+      {children}
+    </EventWizardContext.Provider>
+  );
 }
 
 export function useEventWizard() {

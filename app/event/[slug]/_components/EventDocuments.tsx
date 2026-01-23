@@ -51,7 +51,7 @@ export default function EventDocuments() {
       : "skip",
   );
 
-  const { results, status } = usePaginatedQuery(
+  const { results, status, loadMore } = usePaginatedQuery(
     api.event.getEventBySlug.getEventDocuments,
     isAuthenticated && event
       ? { eventId: event._id, parentId: folderIdForQuery }
@@ -61,7 +61,10 @@ export default function EventDocuments() {
 
   // Commit navigation only after loading finishes
   useEffect(() => {
-    if (pendingFolderId !== null && status === "Exhausted") {
+    if (
+      pendingFolderId !== null &&
+      (status === "Exhausted" || status === "CanLoadMore")
+    ) {
       setCurrentFolderId(pendingFolderId ?? undefined);
       setCommittedFolderName(currentFolder?.name ?? "");
       setPendingFolderId(null);
@@ -73,6 +76,7 @@ export default function EventDocuments() {
       ? initialDocuments.page
       : results;
 
+  console.log(status);
   const isLoading = status === "LoadingFirstPage";
 
   return (
@@ -102,62 +106,70 @@ export default function EventDocuments() {
         </div>
 
         {/* Document list */}
-        <div className="border overflow-hidden rounded-md h-72">
-          <ScrollArea>
-            {documents.length > 0 && (
-              <>
-                {/* Folders */}
-                {documents
-                  .filter((child) => child.type === "folder")
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .map((document) => (
-                    <Button
-                      key={document._id}
-                      variant="ghost"
-                      className="rounded-none w-full justify-start"
-                      disabled={isLoading}
-                      onClick={() => setPendingFolderId(document._id)}
-                    >
-                      <FolderIcon />
+        <ScrollArea className="border overflow-hidden rounded-md h-72">
+          {documents.length > 0 && (
+            <div>
+              {/* Folders */}
+              {documents
+                .filter((child) => child.type === "folder")
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((document) => (
+                  <Button
+                    key={document._id}
+                    variant="ghost"
+                    className="rounded-none w-full justify-start"
+                    disabled={isLoading}
+                    onClick={() => setPendingFolderId(document._id)}
+                  >
+                    <FolderIcon />
+                    {document.name}
+                  </Button>
+                ))}
+
+              {/* Links */}
+              {documents
+                .filter((child) => child.type === "link")
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((document) => (
+                  <Button
+                    key={document._id}
+                    variant="ghost"
+                    className="rounded-none w-full justify-start"
+                    asChild
+                  >
+                    <Link href={document.url!} target="_blank">
+                      <LinkIcon />
                       {document.name}
-                    </Button>
-                  ))}
+                    </Link>
+                  </Button>
+                ))}
 
-                {/* Links */}
-                {documents
-                  .filter((child) => child.type === "link")
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .map((document) => (
-                    <Button
-                      key={document._id}
-                      variant="ghost"
-                      className="rounded-none w-full justify-start"
-                      asChild
-                    >
-                      <Link href={document.url!} target="_blank">
-                        <LinkIcon />
-                        {document.name}
-                      </Link>
-                    </Button>
-                  ))}
-
-                {/* Files */}
-                {documents
-                  .filter((child) => child.type === "file")
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .map((document) => (
-                    <div
-                      key={document._id}
-                      className="inline-flex items-center h-9 px-3 py-2 gap-2 text-sm w-full [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0"
-                    >
-                      <FileIcon />
-                      <span className="truncate">{document.name}</span>
-                    </div>
-                  ))}
-              </>
-            )}
-          </ScrollArea>
-        </div>
+              {/* Files */}
+              {documents
+                .filter((child) => child.type === "file")
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((document) => (
+                  <div
+                    key={document._id}
+                    className="inline-flex items-center h-9 px-3 py-2 gap-2 text-sm w-full [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0"
+                  >
+                    <FileIcon />
+                    <span className="truncate">{document.name}</span>
+                  </div>
+                ))}
+              {status === "CanLoadMore" && (
+                <Button className="w-full rounded-none" variant="secondary"onClick={() => loadMore(10)}>
+                  Load More Documents
+                </Button>
+              )}
+              {status === "LoadingMore" && (
+                <div className="bg-secondary text-muted-foreground text-center h-9 px-3 py-2 text-sm w-full [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0">
+                  Loading...
+                </div>
+              )}
+            </div>
+          )}
+        </ScrollArea>
       </CardContent>
     </Card>
   );

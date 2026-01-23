@@ -70,6 +70,14 @@ export default async function EventPage({
     { token },
   );
 
+  const preloadedZoom = await preloadQuery(
+    api.event.getEventBySlug.getEventZoom,
+    {
+      eventId: eventDetails._id,
+    },
+    { token },
+  );
+
   return (
     <>
       <header className="sticky flex justify-between items-center gap-3 top-0 z-10 bg-background/80 backdrop-blur-md border-b p-4 shadow-sm">
@@ -91,6 +99,7 @@ export default async function EventPage({
           preloadedQuestions={preloadedQuestions}
           preloadedAgenda={preloadedAgenda}
           preloadedDocuments={preloadedDocuments}
+          preloadedZoom={preloadedZoom}
         >
           <EventClient />
         </EventProvider>

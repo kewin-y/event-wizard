@@ -14,6 +14,7 @@ import EventQuestions from "./EventQuestions";
 import EventAgenda from "./EventAgenda";
 import { useEvent } from "../_hooks/event-context";
 import EventDocuments from "./EventDocuments";
+import EventZoom from "./EventZoom";
 
 export default function EventClient() {
   const { details } = useEvent();
@@ -34,8 +35,8 @@ export default function EventClient() {
               ) : null,
             )}
           </TabsList>
-          <EditEventButton details={details} className="ml-auto" />
-          <DeleteEventButton eventId={details._id} />
+          {/*<EditEventButton details={details} className="ml-auto" />*/}
+          <DeleteEventButton eventId={details._id} className="ml-auto"/>
         </div>
         <TabsContent value="details">
           <EventDetails />
@@ -58,6 +59,11 @@ export default function EventClient() {
         {details.enabledFeatures.documents && (
           <TabsContent value="documents">
             <EventDocuments />
+          </TabsContent>
+        )}
+        {details.enabledFeatures.zoom && (
+          <TabsContent value="zoom">
+            <EventZoom />
           </TabsContent>
         )}
       </Tabs>

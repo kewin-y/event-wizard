@@ -15,6 +15,7 @@ type EventContextValue = {
   preloadedDocuments: Preloaded<
     typeof api.event.getEventBySlug.getEventDocuments
   >;
+  preloadedZoom: Preloaded<typeof api.event.getEventBySlug.getEventZoom>;
 };
 
 const EventContext = createContext<EventContextValue | null>(null);
@@ -29,6 +30,7 @@ export function EventProvider({
   preloadedQuestions,
   preloadedAgenda,
   preloadedDocuments,
+  preloadedZoom,
   children,
 }: EventProviderProps) {
   return (
@@ -39,6 +41,7 @@ export function EventProvider({
         preloadedQuestions,
         preloadedAgenda,
         preloadedDocuments,
+        preloadedZoom,
       }}
     >
       {children}
@@ -58,6 +61,7 @@ export function useEvent() {
   const questions = usePreloadedQuery(context.preloadedQuestions);
   const agenda = usePreloadedQuery(context.preloadedAgenda);
   const documents = usePreloadedQuery(context.preloadedDocuments);
+  const zoom = usePreloadedQuery(context.preloadedZoom);
 
   return {
     details,
@@ -65,5 +69,6 @@ export function useEvent() {
     questions,
     agenda,
     documents,
+    zoom,
   };
 }

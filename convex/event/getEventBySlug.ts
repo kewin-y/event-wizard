@@ -174,13 +174,7 @@ export const getEventRootDocument = query({
 
     // Verify user owns the event
     const event = await ctx.db.get(args.eventId);
-    if (!event) {
-      return {
-        page: [],
-        isDone: true,
-        continueCursor: "",
-      };
-    }
+    if (!event) return null;
     if (event.userId !== userId) throw new ConvexError("Not authorized.");
 
     const rootDocument = await ctx.db
@@ -248,5 +242,25 @@ export const getEventDocuments = query({
       .paginate(args.paginationOpts);
 
     return documentItems;
+  },
+});
+
+export const getEventZoom = query({
+  args: {
+    eventId: v.id("events"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new ConvexError("Not authenticated.");
+
+    // Verify user owns the event
+    const event = await ctx.db.get(args.eventId);
+    if (!event) return null;
+    if (event.userId !== userId) throw new ConvexError("Not authorized.");
+
+    return await ctx.db
+      .query("zoomMeetings")
+      .withIndex("by_event", (q) => q.eq("eventId", args.eventId))
+      .unique();
   },
 });

@@ -22,8 +22,10 @@ import { useRouter } from "next/navigation";
 
 export default function DeleteEventButton({
   eventId,
+  className,
 }: {
   eventId: Id<"events">;
+  className?: string;
 }) {
   const router = useRouter();
   const deleteEvent = useMutation(api.event.deleteEvent.default);
@@ -36,7 +38,7 @@ export default function DeleteEventButton({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive">
+        <Button variant="destructive" className={className}>
           <Trash2 /> Delete Event
         </Button>
       </AlertDialogTrigger>

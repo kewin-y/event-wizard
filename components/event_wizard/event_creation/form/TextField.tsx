@@ -8,7 +8,11 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-export function TextField({ label, description }: GenericFieldProps) {
+export function TextField({
+  label,
+  description,
+  placeholder,
+}: GenericFieldProps) {
   const field = useFieldContext<string>();
 
   const errors = useStore(field.store, (state) => state.meta.errors);
@@ -19,14 +23,15 @@ export function TextField({ label, description }: GenericFieldProps) {
 
   return (
     <Field>
-      <FieldLabel htmlFor={`field-${label}`}>{label}</FieldLabel>
-      <FieldDescription>{description}</FieldDescription>
+      {label && <FieldLabel htmlFor={`field-${label}`}>{label}</FieldLabel>}
+      {description && <FieldDescription>{description}</FieldDescription>}
       <Input
         id={`field-${label}`}
         value={field.state.value}
         onChange={(e) => field.handleChange(e.target.value)}
         onBlur={field.handleBlur}
         aria-invalid={isInvalid}
+        placeholder={placeholder}
       />
       {isInvalid && <FieldError errors={errors} />}
     </Field>

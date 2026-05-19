@@ -17,6 +17,7 @@ import { useState } from "react";
 import { Step, EventSchema, EventSchemaValues } from "./types";
 import { useAppForm } from "./form/AppForm";
 import SetupFields from "./SetupFields";
+import AttendeesFields from "./AttendeesFields";
 import { AnyFormApi, useStore, ValidationCause } from "@tanstack/react-form";
 
 const defaultEventValues: EventSchemaValues = {
@@ -26,7 +27,7 @@ const defaultEventValues: EventSchemaValues = {
     image: null,
     features: [],
   },
-  attendees: [],
+  attendees: [{ name: "", email: "" }],
 };
 
 function useIsGroupValid(form: AnyFormApi, group: string) {
@@ -123,7 +124,12 @@ export default function EventCreationDialog() {
                     />
                   );
                 case "Attendees":
-                  return <></>;
+                  return (
+                    <AttendeesFields
+                      form={form}
+                      fields={{ attendees: "attendees" }}
+                    />
+                  );
                 default:
                   return null;
               }

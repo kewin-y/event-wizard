@@ -4,8 +4,9 @@ import { FileUploadField } from "./FileUploadField";
 import { CheckboxArrayField } from "./CheckBoxArrayField";
 
 export type GenericFieldProps = {
-  label: string;
-  description: string;
+  label?: string;
+  description?: string;
+  placeholder?: string;
 };
 
 export const { fieldContext, useFieldContext, formContext, useFormContext } =
